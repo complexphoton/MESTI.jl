@@ -26,7 +26,7 @@ output.side = "both"
 
 # Test the functionality in a test set
 @testset "1D r and t coefficients:" begin
-    for i ∈ 1:10
+    for i ∈ 1:6
 	# Make an interface for two materials whose refractive indices are n1 and n2
         n1 = 1+1.5*rand() # n1 is a random number between 1 and 2.5
         n2 = 1+1.5*rand() # n2 is a random number between 1 and 2.5

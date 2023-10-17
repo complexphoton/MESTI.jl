@@ -61,9 +61,13 @@ For eigenmode computation, such as waveguide mode solver and photonic band struc
 
 To install MESTI.jl, simply open Julia REPL and type: 
 
-<code>import Pkg; Pkg.add("MESTI")</code>
+<code>import Pkg; Pkg.add(rul="https://github.com/complexphoton/MESTI.jl")</code> 
 
-and install other necessary packages by running <code>[install_packages.jl](./mumps/install_packages.jl)</code>
+or 
+
+<code>import Pkg; Pkg.add("MESTI")</code> 
+
+You may also install other necessary packages by running <code>[install_packages.jl](./mumps/install_packages.jl)</code>
 
 However, to use the APF method, the user needs to install the parallel version of [MUMPS](https://graal.ens-lyon.fr/MUMPS/index.php) and its Julia interface [MUMPS3](https://github.com/wrs28/MUMPS3.jl/tree/5.3.3-update). Without MUMPS, MESTI will still run but will only use other methods, which generally take longer and use more memory. So, MUMPS installation is strongly recommended for large-scale multi-input simulations or whenever efficiency is important. See this [MUMPS installation](./mumps) page for steps to install MUMPS.
 

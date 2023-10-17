@@ -2,7 +2,7 @@ name = "MESTI"
 uuid = "8d7f31fa-9986-4e1d-8c81-72752476e54d"
 license = "GPL-3.0"
 authors = ["Ho-Chun Lin<hochunlin0508@gmail.com>, Shiyu Li, Zeyu Wang, and Chia Wei Hsu<cwhsu@usc.edu>"]
-version = "1.0.0"
+version = "0.1.0"
 
 [deps]
 LazyGrids = "7031d0ef-c40d-4431-b2f8-61a8d2f650db"

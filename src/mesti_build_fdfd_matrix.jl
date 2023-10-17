@@ -194,6 +194,12 @@ function mesti_build_fdfd_matrix(epsilon_xx::Union{Array{Int64,3},Array{Float64,
         
         # Total number of grid points for Ex
         nt_Ex = ny_Ex*nz_Ex
+
+        # Checking the whether the permittivity is lossless or not 
+        if (maximum(imag(epsilon_xx)) >= sqrt(eps()))
+            @warn("syst.epsilon_xx contains imaginary part; the permittivity profile is not lossless.")
+        end
+        
     else # 3D case
         # Number of grid points in x, y, and z for Ex, Ey, and Ez
         (nx_Ex, ny_Ex, nz_Ex) = size(epsilon_xx)
