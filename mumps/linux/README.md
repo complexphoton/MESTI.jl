@@ -33,11 +33,11 @@ source opt/intel/oneapi/mpi/latest/env/vars.sh
 
 These commands will configure the necessary environment variables for the Intel compilers, and Intel MPI.
 
-### BLAS, LAPACK, and ScaLPACK
+### BLAS, LAPACK, and ScaLAPACK
 
-MUMPS requires both BLAS, LAPACK, and ScaLPACK libraries, which are standard libraries on a Linux cluster. These libraries are also included in many implementations, such as MKL and OpenBLAS. 
+MUMPS requires both BLAS, LAPACK, and ScaLAPACK libraries, which are standard libraries on a Linux cluster. These libraries are also included in many implementations, such as MKL and OpenBLAS. 
 
-In the example below, we use MKL. Different clusters install MKL in different paths. We will need the correct path for the linker to find corresponding BLAS, LAPACK, and ScaLPACK libraries. In the provided `Makefile.inc`, we assume the MKL path has been exported to an environment variable called `MKLROOT`. Here we show how to export the correct `MKLROOT`. The BLAS, LAPACK, and ScaLPACK libraries can be found under `$(MKLROOT)/lib/intel64`. 
+In the example below, we use MKL. Different clusters install MKL in different paths. We will need the correct path for the linker to find corresponding BLAS, LAPACK, and ScaLAPACK libraries. In the provided `Makefile.inc`, we assume the MKL path has been exported to an environment variable called `MKLROOT`. Here we show how to export the correct `MKLROOT`. The BLAS, LAPACK, and ScaLAPACK libraries can be found under `$(MKLROOT)/lib/intel64`. 
 
 If we are using the Lmod module system and MKL is installed, we can use 
 

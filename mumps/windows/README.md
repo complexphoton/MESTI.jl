@@ -25,9 +25,9 @@ source opt/intel/oneapi/mpi/latest/env/vars.sh
 
 These commands will configure the necessary environment variables for the Intel compilers, and Intel MPI.
 
-### BLAS, LAPACK, and ScaLPACK on WSL
+### BLAS, LAPACK, and ScaLAPACK on WSL
 
-MUMPS requires both BLAS, LAPACK, and ScaLPACK libraries, which are standard libraries on a Linux cluster. These libraries are also included in many implementations, such as MKL and OpenBLAS. 
+MUMPS requires both BLAS, LAPACK, and ScaLAPACK libraries, which are standard libraries on a Linux cluster. These libraries are also included in many implementations, such as MKL and OpenBLAS. 
 
 In the example below, we use MKL. On WSL, please visit [Intel oneAPI Math Kernel Library](https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl.html) to install MKL. During the installation process, ensure that we select custom installation and choose only the Intel oneAPI Math Kernel Library. This will ensure the necessary libraries are properly installed for MUMPS to function correctly.
 
