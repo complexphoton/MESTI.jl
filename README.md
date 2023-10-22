@@ -61,7 +61,7 @@ For eigenmode computation, such as waveguide mode solver and photonic band struc
 
 To install MESTI.jl, simply open Julia REPL and type: 
 
-<code>import Pkg; Pkg.add(rul="https://github.com/complexphoton/MESTI.jl")</code> 
+<code>import Pkg; Pkg.add(url="https://github.com/complexphoton/MESTI.jl")</code> 
 
 or 
 
