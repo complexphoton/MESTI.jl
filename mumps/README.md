@@ -27,7 +27,7 @@ Read the file <code>INSTALL</code>, copy the closest <code>Makefile.inc</code> f
  - <code>LAPACK</code>: how the Fortran compiler can link to the LAPACK library
  - <code>SCALAP</code>: how the Fortran compiler can link to the ScaLAPACK library
  - <code>LIBBLAS</code>: how the Fortran compiler can link to the BLAS library
- - <code>RPATH_OPT</code>: the path the shared libraries will be built up, such as <code>/home/hclin/MUMPS_5.6.2/lib/</code>
+ - <code>RPATH_OPT</code>: the path to shared libraries that will be built up, such as <code>/home/hclin/MUMPS_5.6.2/lib/</code>
 
 Note that from our experience, <code>RPATH_OPT</code> must be specified to successfully install the parallel version of MUMPS on Linux and Windows.
 
