@@ -18,6 +18,7 @@ TensorCast = "02d47bb6-7ce6-556a-be16-bb1710789e2b"
 [compat]
 LazyGrids = "0.5.0"
 MPI = "0.20.16"
+MUMPS3 = "2.0.0"
 TensorCast = "0.4.6"
 julia = "1"
 
