@@ -2442,7 +2442,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
                     l_low = 1 # index for the inputs/outputs on the low surface
 
                     if M_in_low > 0
-                        prefactor = reshape(exp((-1im*dn)*channels.low.kzdx_prop)./channels.low.sqrt_nu_prop, N_prop_low, 1)
+                        prefactor = reshape(exp.((-1im*dn)*channels.low.kzdx_prop)./channels.low.sqrt_nu_prop, N_prop_low, 1)
                     end
                     for ii = 1:M_in_low_s # s-polarized input from low
                         c = u_low_prime*[reshape(Ex[:, :, l_low, ii], :); reshape(Ey[:, :, l_low, ii], :)] # c is a 2*nx*ny-by-1 column vector of transverse mode coefficients
@@ -2500,7 +2500,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
                     c_in = zeros(ny_Ex, 1)
                     l_low = 1 # index for the inputs/outputs on the low surface
                     if M_in_low > 0
-                        prefactor = reshape(exp((-1im*dn)*channels.low.kzdx_prop)./channels.low.sqrt_nu_prop, N_prop_low, 1)
+                        prefactor = reshape(exp.((-1im*dn)*channels.low.kzdx_prop)./channels.low.sqrt_nu_prop, N_prop_low, 1)
                     end
                     for ii = 1:M_in_low # input from low
                         c = u_prime*Ex[:, l_low, ii] # c is a ny_Ex-by-1 column vector of transverse mode coefficients
@@ -2566,7 +2566,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
                         end
 
                         if M_in_high_s > 0 || M_in_high_p > 0
-                            prefactor = reshape(exp((-1im*dn)*channels.high.kzdx_prop)./channels.high.sqrt_nu_prop, N_prop_high, 1)                                
+                            prefactor = reshape(exp.((-1im*dn)*channels.high.kzdx_prop)./channels.high.sqrt_nu_prop, N_prop_high, 1)                                
                         end
                         for ii = 1:M_in_high_s # s-polarized input from high
                             c = u_high_prime*[reshape(Ex[:, :, l_high, M_in_low+ii], :); reshape(Ey[:, :, l_high, M_in_low+ii], :)] # c is a 2*nx*ny-by-1 column vector of transverse mode coefficients
@@ -2618,7 +2618,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
                    end
                                             
                    if M_in_high > 0
-                        prefactor = reshape(exp((-1im*dn)*channels.high.kzdx_prop)./channels.high.sqrt_nu_prop, N_prop_high, 1)       
+                        prefactor = reshape(exp.((-1im*dn)*channels.high.kzdx_prop)./channels.high.sqrt_nu_prop, N_prop_high, 1)       
                    end
                                             
                    for ii = 1:M_in_high # input from high
