@@ -1118,11 +1118,11 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
             end
         else
             # Coefficients of wavefronts, in matrices     
-            v_in_low_s = spzeros(N_prop_low, 0)
-            v_in_low_p = spzeros(N_prop_low, 0)
+            v_in_low_s = spzeros(ComplexF64, N_prop_low, 0)
+            v_in_low_p = spzeros(ComplexF64, N_prop_low, 0)
             if two_sided
-                v_in_high_s = spzeros(N_prop_high, 0)
-                v_in_high_p = spzeros(N_prop_high, 0)
+                v_in_high_s = spzeros(ComplexF64, N_prop_high, 0)
+                v_in_high_p = spzeros(ComplexF64,N_prop_high, 0)
             end        
         end
     else
@@ -1134,9 +1134,9 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
             end
         else
             # Coefficients of wavefronts, in matrices     
-            v_in_low = spzeros(N_prop_low, 0)
+            v_in_low = spzeros(ComplexF64, N_prop_low, 0)
             if two_sided
-                v_in_high = spzeros(N_prop_high, 0)
+                v_in_high = spzeros(ComplexF64, N_prop_high, 0)
             end        
         end
     end
@@ -1368,11 +1368,11 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
                 end
             else
                 # Coefficients of wavefronts, in matrices     
-                v_out_low_s = spzeros(N_prop_low, 0)
-                v_out_low_p = spzeros(N_prop_low, 0)
+                v_out_low_s = spzeros(ComplexF64, N_prop_low, 0)
+                v_out_low_p = spzeros(ComplexF64, N_prop_low, 0)
                 if two_sided
-                    v_out_high_s = spzeros(N_prop_high, 0)
-                    v_out_high_p = spzeros(N_prop_high, 0)
+                    v_out_high_s = spzeros(ComplexF64, N_prop_high, 0)
+                    v_out_high_p = spzeros(ComplexF64, N_prop_high, 0)
                 end        
             end
         else
@@ -1384,9 +1384,9 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
                 end
             else
                 # Coefficients of wavefronts, in matrices     
-                v_out_low = spzeros(N_prop_low, 0)
+                v_out_low = spzeros(ComplexF64, N_prop_low, 0)
                 if two_sided
-                    v_out_high = spzeros(N_prop_high, 0)
+                    v_out_high = spzeros(ComplexF64, N_prop_high, 0)
                 end        
             end
         end
@@ -2438,7 +2438,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
                     kz_z = [repeat(reshape(channels.low.kzdx_all, nx*ny, 1), 2, 1)].*reshape(l, 1, :) # kz*z; 2*nx*ny-by-nz_low_extra matrix through implicit expansion
                     exp_pikz = exp.( 1im*kz_z) # exp(+i*kz*z)
                     exp_mikz = exp.(-1im*kz_z) # exp(-i*kz*z)
-                    c_in = zeros(2*nx*ny, 1)
+                    c_in = zeros(ComplexF64, 2*nx*ny, 1)
                     l_low = 1 # index for the inputs/outputs on the low surface
 
                     if M_in_low > 0
@@ -2497,7 +2497,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
                     kz_z = reshape(channels.low.kzdx_all, ny_Ex, 1).*reshape(l, 1, :) # kz*z; ny_Ex-by-nz_low_extra matrix through implicit expansion
                     exp_pikz = exp.( 1im*kz_z) # exp(+i*kz*z)
                     exp_mikz = exp.(-1im*kz_z) # exp(-i*kz*z)
-                    c_in = zeros(ny_Ex, 1)
+                    c_in = zeros(ComplexF64, ny_Ex, 1)
                     l_low = 1 # index for the inputs/outputs on the low surface
                     if M_in_low > 0
                         prefactor = reshape(exp.((-1im*dn)*channels.low.kzdx_prop)./channels.low.sqrt_nu_prop, N_prop_low, 1)
@@ -2548,7 +2548,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
                         kz_z = [repeat(reshape(channels.high.kzdx_all, nx*ny, 1),2,1)].*reshape(l, 1, :) # kz*z; 2*nx*ny-by-nz_low_extra matrix through implicit expansion
                         exp_pikz = exp.( 1im*kz_z) # exp(+i*kz*z)
                         exp_mikz = exp.(-1im*kz_z) # exp(-i*kz*z)
-                        c_in = zeros(2*nx*ny, 1)
+                        c_in = zeros(ComplexF64, 2*nx*ny, 1)
                         l_high = size(Ex, 3) # index for the inputs/outputs on the high surface
 
                         for ii = 1:M_in_low_s # s-polarized input from low
@@ -2609,7 +2609,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
                     kz_z = reshape(channels.high.kzdx_all, ny_Ex, 1).*reshape(l, 1, :) # kz*z; ny_Ex-by-nz_low_extra matrix through implicit expansion
                     exp_pikz = exp.( 1im*kz_z) # exp(+i*kz*z)
                     exp_mikz = exp.(-1im*kz_z) # exp(-i*kz*z)
-                    c_in = zeros(ny_Ex, 1)
+                    c_in = zeros(ComplexF64, ny_Ex, 1)
                     l_high = size(Ex, 2) # index for the inputs/outputs on the high surface
                     
                     for ii = 1:M_in_low # input from low
