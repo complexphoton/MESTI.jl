@@ -2,9 +2,6 @@
 # This Julia script demonstrates the usage of the MUMPS solver for solving sparse linear systems,
 # specifically focusing on computing the Schur complement, which MESTI would utilize in APF method.
 
-# Set the environment variable "MUMPS_PREFIX" to the path of MUMPS library on your machine.
-ENV["MUMPS_PREFIX"] = "/home/hclin/MUMPS_5.6.2_par_metis/lib"
-
 # Import necessary packages
 using MUMPS3, MPI, LinearAlgebra, SparseArrays, Statistics, Test
 

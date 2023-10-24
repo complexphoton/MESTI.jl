@@ -6,7 +6,6 @@ export Info
 # Export a function mesti_matrix_solver!()
 export mesti_matrix_solver!
 
-
 mutable struct Matrices
     # A composite data type to store the matrices, A, B, and C
     # After construct matrix K, we will set them nothing to reduce memory usage

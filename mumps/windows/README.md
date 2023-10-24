@@ -79,6 +79,14 @@ cd metis-5.1.0; make config; sudo make install;
 
 Then, by default, the library file, header file, and binaries will be installed in `/usr/local/lib`, `/usr/local/include`, and `/usr/local/bin`, respectively.
 
+In some rare cases, your machine cannot find METIS libraries by itself when you run Julia interface for MUMPS. You can append the METIS libraries to your `LD_LIBRARYP_PATH`
+
+```shell
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LMETISDIR
+```
+
+`LMETISDIR` is the path to the folder where the METIS library is.
+
 ### Running MUMPS in Julia
 
 In some cases, WSL may not find the libraries by itself when we run Julia interface for MUMPS. To solve those issues, we can append those library paths to `LD_PRELOAD` before running Julia. For example, with the Intel oneAPI installed under /opt, we can type,

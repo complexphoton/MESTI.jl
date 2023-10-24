@@ -78,6 +78,14 @@ cd metis-5.1.0; make config; sudo make install;
 
 Then, by default, the library file, header file, and binaries will be installed in `/usr/local/lib`, `/usr/local/include`, and `/usr/local/bin`.
 
+In some rare cases, your machine cannot find METIS libraries by itself when you run Julia interface for MUMPS. You can append the METIS libraries to your `LD_LIBRARYP_PATH`
+
+```shell
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LMETISDIR
+```
+
+`LMETISDIR` is the path to the folder where the METIS library is.
+
 ### Running MUMPS in Julia
 
 You may need to configure [MPI.jl](https://juliaparallel.org/MPI.jl/stable/configuration/) before running MUMPS in Julia. The steps are straightforward using MPIPreferences.jl. First, install MPIPreferences.jl by entering

@@ -35,7 +35,7 @@ MESTI.jl is a general-purpose solver with its interface written to provide maxim
  - Shared memory parallelism (with multithreaded BLAS and with OpenMP in MUMPS) and distributed memory parallelism (with MPI in MUMPS).
  - Single-precision and double-precision arithmetic.
 
-## When to use MESTI?
+## When to use MESTI.jl?
 
 MESTI.jl can perform most linear-response computations for arbitrary structures, such as
 
@@ -44,11 +44,11 @@ MESTI.jl can perform most linear-response computations for arbitrary structures,
 - Local density of states.
 - [Inverse design](https://github.com/complexphoton/APF_inverse_design) based on the above quantities.
 
-Since MESTI can use the APF method to handle a large number of input states simultaneously, the computational advantage of MESTI is the most pronounced in multi-input systems.
+Since MESTI.jl can use the APF method to handle a large number of input states simultaneously, the computational advantage of MESTI.jl is the most pronounced in multi-input systems.
 
 There are use cases that MESTI.jl can handle but is not necessarily the most efficient, such as
 - Broadband response problems involving many frequencies but only a few input states. Time-domain methods like FDTD may be preferred as they can compute a broadband response without looping over frequencies.
-- Problems like plasmonics that require more than an order of magnitude difference in the discretization grid size at different regions of the structure. Finite-element methods may be preferred as they can handle varying spatial resolutions. (Finite-element methods can also adopt APF, but MESTI uses finite difference with a fixed grid size.)
+- Problems like plasmonics that require more than an order of magnitude difference in the discretization grid size at different regions of the structure. Finite-element methods may be preferred as they can handle varying spatial resolutions. (Finite-element methods can also adopt APF, but MESTI.jl uses finite difference with a fixed grid size.)
 - Homogeneous structures with a small surface-to-volume ratio. Boundary element methods may be preferred as they only discretize the surface.
 
 Problems that MESTI.jl currently does not handle:
@@ -59,46 +59,18 @@ For eigenmode computation, such as waveguide mode solver and photonic band struc
 
 ## Installation
 
-To install MESTI.jl without parallel version of [MUMPS](https://mumps-solver.org/index.php), simply open Julia REPL and type: 
+To use the APF method, before installing MESTI.jl, the user needs to install the parallel version of [MUMPS](https://mumps-solver.org/index.php) and its Julia interface [MUMPS3](https://github.com/wrs28/MUMPS3.jl/tree/5.3.3-update). Without MUMPS, MESTI.jl will still run but will only use other methods, which generally take longer and use more memory. So, MUMPS installation is strongly recommended for large-scale multi-input simulations or whenever efficiency is important. See this [MUMPS installation](./mumps) page for steps to install MUMPS.
 
-<code>using Pkg; Pkg.add(PackageSpec(url="http://github.com/wrs28/MUMPS3.jl", rev="5.3.3-update"))</code>
+To install MESTI.jl, open Julia REPL and type:  
 
-<code>Pkg.add(url="https://github.com/complexphoton/MESTI.jl")</code> 
+```julia
+using Pkg; Pkg.add(PackageSpec(url="http://github.com/wrs28/MUMPS3.jl", rev="5.3.3-update"))
+Pkg.add("MESTI")
+```
 
-or 
+Note if you want to download the latest MESTI.jl (i.e. this main branch) instead of a released version of MESTI.jl, you can replace the command, you can replace```Pkg.add("MESTI")``` with  ```Pkg.add(url="https://github.com/complexphoton/MESTI.jl")```
 
-<code>using Pkg; Pkg.add(PackageSpec(url="http://github.com/wrs28/MUMPS3.jl", rev="5.3.3-update"))</code>
-
-<code>Pkg.add("MESTI")</code> 
-
-However, to use the APF method, the user needs to install the parallel version of [MUMPS](https://mumps-solver.org/index.php) and its Julia interface [MUMPS3](https://github.com/wrs28/MUMPS3.jl/tree/5.3.3-update). Without MUMPS, MESTI will still run but will only use other methods, which generally take longer and use more memory. So, MUMPS installation is strongly recommended for large-scale multi-input simulations or whenever efficiency is important. See this [MUMPS installation](./mumps) page for steps to install MUMPS.
-
-After installing the parallel version of MUMPS and appending necessary library paths to `LD_PRELOAD`, which we describe in the [linux](./mumps/linux#running-mumps-in-julia)/[windows](./mumps/windows#running-mumps-in-julia) OS, to install MESTI.jl open Julia REPL and set the Julia environment variable <code>MUMPS_PREFIX</code>to the path to your own MUMPS libraries. For example, we can type 
-
-<code>ENV["MUMPS_PREFIX"] = "/home/hclin/MUMPS_5.6.2/lib"</code> 
-
-<code>using Pkg; Pkg.add(PackageSpec(url="http://github.com/wrs28/MUMPS3.jl", rev="5.3.3-update"))</code>
-
-<code>Pkg.add(url="https://github.com/complexphoton/MESTI.jl")</code> 
-
-or 
-
-<code>ENV["MUMPS_PREFIX"] = "/home/hclin/MUMPS_5.6.2/lib"</code> 
-
-<code>using Pkg; Pkg.add(PackageSpec(url="http://github.com/wrs28/MUMPS3.jl", rev="5.3.3-update"))</code>
-
-<code>Pkg.add("MESTI")</code>
-
-Please remember to set your own path for <code>ENV["MUMPS_PREFIX"]</code>code>
-
-
-If you install MESTI.jl without MUMPS in the beginning, later you want to reinstall MESTI.jl with compiled MUMPS. Please first remove the compiled MESTI.jl first through
-
-<code>rm -r ~/.julia/compiled/v1.9/MESTI/</code>
-
-and then you can reinstall MESTI.jl with compiled MUMPS.
-
-After installing MESTI.jl, you may also install other necessary packages by running <code>[install_packages.jl](./mumps/install_packages.jl)</code>
+After installing MESTI.jl, you may also install other necessary packages which you will utilize in the examples by running <code>[install_packages.jl](./mumps/install_packages.jl)</code>
 
 ## Usage Summary 
 
