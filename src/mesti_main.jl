@@ -10,7 +10,8 @@ mutable struct Source_struct
     # See also: mesti and mesti2s   
    pos::Vector{Vector{Int64}}
    data::Union{Vector{Array{Int64,2}},Vector{Array{Float64,2}},Vector{Array{ComplexF64,2}},
-         Vector{Array{Int64,4}},Vector{Array{Float64,4}},Vector{Array{ComplexF64,4}}} 
+               Vector{Array{Int64,3}},Vector{Array{Float64,3}},Vector{Array{ComplexF64,3}},
+               Vector{Array{Int64,4}},Vector{Array{Float64,4}},Vector{Array{ComplexF64,4}}} 
    ind::Vector{Vector{Int64}}
    isempty::Integer
     
@@ -195,7 +196,7 @@ end
                             "all" - (default) PML in x, y, and z directions for 3D and PML in y and z directions for 2D TM
                             "x"   - PML in x direction
                             "y"   - PML in y direction
-                            "z"   - PML in y direction    
+                            "z"   - PML in z direction    
                     side (string; optional): 
                         Side(s) where PML is placed.Available choices are (case-insensitive):
                             "both" - (default) PML on both sides

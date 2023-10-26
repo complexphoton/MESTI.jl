@@ -2302,7 +2302,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
        end
     else # when opts.return_field_profile = true
         # Ex returned by mesti() has size [nx_Ex, ny_Ex, nz_tot_Ex, M_in_low+M_in_high] where nz_Ex_tot = nz_Ex + sum(nz_extra). Ey and Ez follow the same.
-        # Here, we remove the npixels_spacer pixels
+        # Here, we remove the PML.npixels and npixels_spacer pixels
         nz_remove_low = nz_extra[1] - 1 # we keep the surface pixel
         if two_sided
             nz_remove_high = nz_extra[2] - 1
@@ -2363,33 +2363,42 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
                 u_Ex = kron(channels.u_x_m(channels.kydx), channels.u_x_n(channels.kxdx))
                 u_Ey = kron(channels.u_y_m(channels.kydx), channels.u_y_n(channels.kxdx))
                 u_Ez = kron(channels.u_z_m(channels.kydx), channels.u_z_n(channels.kxdx))
-                u_dEz_over_dx = kron(channels.u_z_m(channels.kydx), channels.du_z_n(channels.kxdx))
-                u_dEz_over_dy = kron(channels.du_z_m(channels.kydx), channels.u_z_n(channels.kxdx))
+                #u_dEz_over_dx = kron(channels.u_z_m(channels.kydx), channels.du_z_n(channels.kxdx))
+                #u_dEz_over_dy = kron(channels.du_z_m(channels.kydx), channels.u_z_n(channels.kxdx))
 
-                kappa_x_all_low = sin.((channels.kxdx_all)/2)  
-                kappa_y_all_low = sin.((channels.kydx_all)/2)    
+                kappa_x_all_low = sin.(reshape(reapt(channels.kxdx_all,1,size(channels.kydx_all)),:)/2)  
+                kappa_y_all_low = sin.(reshape(reapt(transpose(channels.kydx_all),size(channels.kxdx_all),1),:)/2)    
                 kappa_z_all_low = sin.((channels.low.kzdx_all)/2)     
 
                 denominator = sqrt.(kappa_x_all_low.^2+kappa_y_all_low.^2)
                 alpha_x_all_low_s = -kappa_y_all_low./denominator
                 alpha_y_all_low_s = kappa_x_all_low./denominator
+                alpha_z_all_low_s = zeros(size(channels.low.kzdx_all,1),:)
+                
                 alpha_x_all_low_s[isnan.(alpha_x_all_low_s)] .= 0 
                 alpha_y_all_low_s[isnan.(alpha_y_all_low_s)] .= 1
 
                 denominator = sqrt.((abs.(kappa_x_all_low.*kappa_z_all_low)).^2+(abs.(kappa_y_all_low.*kappa_z_all_low)).^2+(abs.(kappa_x_all_low.^2+kappa_y_all_low.^2)).^2)
                 alpha_x_all_low_p = kappa_x_all_low.*kappa_z_all_low./denominator
                 alpha_y_all_low_p = kappa_y_all_low.*kappa_z_all_low./denominator
-                alpha_z_all_low_p = (-1)*(-1)*(kappa_x_all_low.^2+kappa_y_all_low.^2)./denominator # for -z direction
+                alpha_z_all_low_p = (-1)*(-1)*(kappa_x_all_low.^2+kappa_y_all_low.^2)./denominator # for propagation along -z direction
 
                 alpha_x_all_low_p[isnan.(alpha_x_all_low_p)] .= 1   
                 alpha_y_all_low_p[isnan.(alpha_y_all_low_p)] .= 0  
                 alpha_z_all_low_p[isnan.(alpha_z_all_low_p)] .= 0                
 
                 # u where the a-th column is the a-th channels; it includes all the propagating and evanescent channels.
-                u_low = [[u_Ex.*reshape(alpha_x_all_low_s,1,:); u_Ey.*reshape(alpha_y_all_low_s,1,:)] [u_Ex.*reshape(alpha_x_all_low_p,1,:)+1im*u_dEz_over_dx*reshape(cos.(channels.low.kzdx_all/2).*alpha_z_all_low_p./sin.(channels.low.kzdx_all),1,:); u_Ey.*reshape(alpha_y_all_low_p,1,:)+1im*u_dEz_over_dy*reshape(cos.(channels.low.kzdx_all/2).*alpha_z_all_low_p./sin.(channels.low.kzdx_all),1,:)]]
-     
+                # u_low = [[u_Ex.*reshape(alpha_x_all_low_s,1,:); u_Ey.*reshape(alpha_y_all_low_s,1,:)]
+                #          [u_Ex.*reshape(alpha_x_all_low_p,1,:)+1im*u_dEz_over_dx*reshape(cos.(channels.low.kzdx_all/2).*alpha_z_all_low_p./sin.(channels.low.kzdx_all),1,:); 
+                #           u_Ey.*reshape(alpha_y_all_low_p,1,:)+1im*u_dEz_over_dy*reshape(cos.(channels.low.kzdx_all/2).*alpha_z_all_low_p./sin.(channels.low.kzdx_all),1,:)]]
+                # u_low = [[u_Ex.*reshape(alpha_x_all_low_s,1,:); u_Ey.*reshape(alpha_y_all_low_s,1,:); u_Ez.*reshape(alpha_z_all_low_s,1,:)]
+                #          [u_Ex.*reshape(alpha_x_all_low_p,1,:); u_Ey.*reshape(alpha_y_all_low_p,1,:); u_Ez.*reshape(alpha_z_all_low_p,1,:)]]
+                u_low_s = [u_Ex.*reshape(alpha_x_all_low_s,1,:); u_Ey.*reshape(alpha_y_all_low_s,1,:); u_Ez.*reshape(alpha_z_all_low_s,1,:)]
+                u_low_p = [u_Ex.*reshape(alpha_x_all_low_p,1,:); u_Ey.*reshape(alpha_y_all_low_p,1,:); u_Ez.*reshape(alpha_z_all_low_p,1,:)]
+
                 # We use u' to project the field on the low or high surface onto the complete and orthonormal set of transverse modes.            
-                u_low_prime = u_low' 
+                u_low_s_prime = u_low_s'
+                u_low_p_prime = u_low_p'
 
                 if two_sided
                     kappa_x_all_high = kappa_x_all_low  
@@ -2398,17 +2407,26 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
 
                     alpha_x_all_high_s = alpha_x_all_low_s
                     alpha_y_all_high_s = alpha_x_all_low_s
-
+                    alpha_z_all_high_s = zeros(size(channels.high.kzdx_all,1),:)
+                    
                     denominator = sqrt.((abs.(kappa_x_all_high.*kappa_z_all_high)).^2+(abs.(kappa_y_all_high.*kappa_z_all_high)).^2+(abs.(kappa_x_all_high.^2+kappa_y_all_high.^2)).^2)
                     alpha_x_all_high_p = kappa_x_all_high.*kappa_z_all_high./denominator
                     alpha_y_all_high_p = kappa_y_all_high.*kappa_z_all_high./denominator
-                    alpha_z_all_high_p = (-1)*(kappa_x_all_high.^2+kappa_y_all_high.^2)./denominator # for +z direction
+                    alpha_z_all_high_p = (-1)*(kappa_x_all_high.^2+kappa_y_all_high.^2)./denominator # for propagation along +z direction
                     alpha_x_all_high_p[isnan.(alpha_x_all_high_p)] .= 1
                     alpha_y_all_high_p[isnan.(alpha_y_all_high_p)] .= 0
                     alpha_z_all_high_p[isnan.(alpha_z_all_high_p)] .= 0 
 
-                    u_high = [[u_Ex.*reshape(alpha_x_all_high_s,1,:); u_Ey.*reshape(alpha_y_all_high_s,1,:)] [u_Ex.*reshape(alpha_x_all_high_p,1,:)+1im*u_dEz_over_dx*reshape(cos.(channels.high.kzdx_all/2).*alpha_z_all_high_p./sin.(channels.high.kzdx_all),1,:); u_Ey.*reshape(alpha_y_all_high_p,1,:)+1im*u_dEz_over_dy*reshape(cos.(channels.high.kzdx_all/2).*alpha_z_all_high_p./sin.(channels.high.kzdx_all),1,:)]] 
-                    u_high_prime = u_high'
+                    # u_high = [[u_Ex.*reshape(alpha_x_all_high_s,1,:); u_Ey.*reshape(alpha_y_all_high_s,1,:)]
+                    #           [u_Ex.*reshape(alpha_x_all_high_p,1,:)+1im*u_dEz_over_dx*reshape(cos.(channels.high.kzdx_all/2).*alpha_z_all_high_p./sin.(channels.high.kzdx_all),1,:);
+                    #            u_Ey.*reshape(alpha_y_all_high_p,1,:)+1im*u_dEz_over_dy*reshape(cos.(channels.high.kzdx_all/2).*alpha_z_all_high_p./sin.(channels.high.kzdx_all),1,:)]] 
+                    # u_high = [[u_Ex.*reshape(alpha_x_all_high_s,1,:); u_Ey.*reshape(alpha_y_all_high_s,1,:); u_Ez.*reshape(alpha_z_all_high_s,1,:)]
+                    #           [u_Ex.*reshape(alpha_x_all_high_p,1,:); u_Ey.*reshape(alpha_y_all_high_p,1,:); u_Ez.*reshape(alpha_z_all_high_p,1,:)]]
+                    u_high_s = [u_Ex.*reshape(alpha_x_all_high_s,1,:); u_Ey.*reshape(alpha_y_all_high_s,1,:); u_Ez.*reshape(alpha_z_all_high_s,1,:)]
+                    u_high_p = [u_Ex.*reshape(alpha_x_all_high_p,1,:); u_Ey.*reshape(alpha_y_all_high_p,1,:); u_Ez.*reshape(alpha_z_all_high_p,1,:)]
+
+                    u_high_s_prime = u_high_s'
+                    u_high_p_prime = u_high_p'    
                 end
             else
                 u = channels.u_x_m(channels.kydx_all)
@@ -2416,6 +2434,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
             end
             
             nz_low_extra = opts.nz_low - 1
+
             if nz_low_extra == -1
                 # Remove the single pixel of syst.epsilon_low on the low
                 if ~use_2D_TM
@@ -2433,58 +2452,81 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
                     Ez_low = zeros(ComplexF64, nx_Ez, ny_Ez, nz_low_extra, size(Ez,4))                
                     # The l below is l = l - l_low, where l_low is the location of the inputs/outputs on the low surface.
                     l = (-nz_low_extra):1:-1
+
+                    # What is the case nx_Ex != nx_Ey != nx_Ez?
+                    # What is the case ny_Ex != ny_Ey != ny_Ez?
+                    
                     nx = maximum([nx_Ex,nx_Ey])
                     ny = maximum([ny_Ex,ny_Ey])
-                    kz_z = [repeat(reshape(channels.low.kzdx_all, nx*ny, 1), 2, 1)].*reshape(l, 1, :) # kz*z; 2*nx*ny-by-nz_low_extra matrix through implicit expansion
+                    #kz_z = [repeat(reshape(channels.low.kzdx_all, nx*ny, 1), 2, 1)].*reshape(l, 1, :) # kz*z; 2*nx*ny-by-nz_low_extra matrix through implicit expansion
+                    kz_z = reshape(channels.low.kzdx_all, nx*ny, 1).*reshape(l, 1, :) # kz*z; nx*ny-by-nz_low_extra matrix through implicit expansion
                     exp_pikz = exp.( 1im*kz_z) # exp(+i*kz*z)
                     exp_mikz = exp.(-1im*kz_z) # exp(-i*kz*z)
-                    c_in = zeros(ComplexF64, 2*nx*ny, 1)
+                    c_in_s = zeros(ComplexF64, nx*ny, 1)
+                    c_in_p = zeros(ComplexF64, nx*ny, 1)
+
                     l_low = 1 # index for the inputs/outputs on the low surface
 
                     if M_in_low > 0
                         prefactor = reshape(exp.((-1im*dn)*channels.low.kzdx_prop)./channels.low.sqrt_nu_prop, N_prop_low, 1)
                     end
+                    ###
                     for ii = 1:M_in_low_s # s-polarized input from low
-                        c = u_low_prime*[reshape(Ex[:, :, l_low, ii], :); reshape(Ey[:, :, l_low, ii], :)] # c is a 2*nx*ny-by-1 column vector of transverse mode coefficients
-                        # c_in is the incident wavefront at n_low; note we need to back propagate dn pixel from z=0
-                        c_in[:] .= 0
+                        #c = u_low_prime*[reshape(Ex[:, :, l_low, ii], :); reshape(Ey[:, :, l_low, ii], :)] # c is a 2*nx*ny-by-1 column vector of transverse mode coefficients
+                        c_s = u_low_s_prime*[reshape(Ex[:, :, l_low, ii], :); reshape(Ey[:, :, l_low, ii], :); reshape(Ez[:, :, l_low, ii], :)] # c_s is a nx*ny-by-1 column vector of transverse mode coefficients for s-polarization
+                        c_p = u_low_p_prime*[reshape(Ex[:, :, l_low, ii], :); reshape(Ey[:, :, l_low, ii], :); reshape(Ez[:, :, l_low, ii], :)] # c_p is a nx*ny-by-1 column vector of transverse mode coefficients for p-polarization
+        
+                        # c_in_s is the s-polarized incident wavefront at n_low; note we need to back propagate dn pixel from z=0
+                        c_in_s[:] .= 0
                         if use_ind_in
-                            c_in[channels.low.ind_prop[ind_in_low_s[ii]]] = prefactor[ind_in_low_s[ii]]
+                            c_in_s[channels.low.ind_prop[ind_in_low_s[ii]]] = prefactor[ind_in_low_s[ii]]
                         else
-                            c_in[channels.low.ind_prop] = prefactor.*v_in_low_s[:,ii]                                
+                            c_in_s[channels.low.ind_prop] = prefactor.*v_in_low_s[:,ii]                                
                         end
-                        c_out = c - c_in
-                        Ex_low[:,:,:,ii] = reshape([u_Ex.*reshape(alpha_x_all_low_s,1,:) u_Ex.*reshape(alpha_x_all_low_p,1,:)]*(c_in.*exp_pikz + c_out.*exp_mikz),nx_Ex,ny_Ex,nz_low_extra)
-                        Ey_low[:,:,:,ii] = reshape([u_Ey.*reshape(alpha_y_all_low_s,1,:) u_Ey.*reshape(alpha_y_all_low_p,1,:)]*(c_in.*exp_pikz + c_out.*exp_mikz),nx_Ey,ny_Ey,nz_low_extra)
-                        Ez_low[:,:,:,ii] = reshape([u_Ez*0 u_Ez.*reshape(alpha_z_all_low_p,1,:)]*(c_in.*exp_pikz + c_out.*exp_mikz),nx_Ez,ny_Ez,nz_low_extra)                            
+                        c_out_s = c_s - c_in_s
+                        c_out_p = c_p - c_in_p
+
+                        Ex_low[:,:,:,ii] = reshape(u_Ex.*reshape(alpha_x_all_low_s,1,:)*(c_in_s.*exp_pikz + c_out_s.*exp_mikz) + u_Ex.*reshape(alpha_x_all_low_p,1,:)*(c_in_p.*exp_pikz + c_out_p.*exp_mikz), nx_Ex,ny_Ex,nz_low_extra)
+                        Ey_low[:,:,:,ii] = reshape(u_Ey.*reshape(alpha_y_all_low_s,1,:)*(c_in_s.*exp_pikz + c_out_s.*exp_mikz) + u_Ey.*reshape(alpha_y_all_low_p,1,:)*(c_in_p.*exp_pikz + c_out_p.*exp_mikz), nx_Ey,ny_Ey,nz_low_extra)
+                        Ez_low[:,:,:,ii] = reshape(u_Ez.*reshape(alpha_z_all_low_s,1,:)*(c_in_s.*exp_pikz + c_out_s.*exp_mikz) + u_Ez.*reshape(alpha_z_all_low_p,1,:)*(c_in_p.*exp_pikz + c_out_p.*exp_mikz), nx_Ez,ny_Ez,nz_low_extra)                       
                     end
                     for ii = 1:M_in_low_p # p-polarized input from low
-                        c = u_low_prime*[reshape(Ex[:, :, l_low, M_in_low_s+ii], :); reshape(Ey[:, :, l_low, M_in_low_s+ii], :)] # c is a 2*nx*ny-by-1 column vector of transverse mode coefficients
-                        # c_in is the incident wavefront at n_low; note we need to back propagate dn pixel from z=0
-                        c_in[:] .= 0
+                        #c = u_low_prime*[reshape(Ex[:, :, l_low, M_in_low_s+ii], :); reshape(Ey[:, :, l_low, M_in_low_s+ii], :)] # c is a 2*nx*ny-by-1 column vector of transverse mode coefficients
+                        c_s = u_low_s_prime*[reshape(Ex[:, :, l_low, M_in_low_s+ii], :); reshape(Ey[:, :, l_low, M_in_low_s+ii], :); reshape(Ez[:, :, l_low, M_in_low_s+ii], :)] # c_s is a nx*ny-by-1 column vector of transverse mode coefficients for s-polarization
+                        c_p = u_low_p_prime*[reshape(Ex[:, :, l_low, M_in_low_s+ii], :); reshape(Ey[:, :, l_low, M_in_low_s+ii], :); reshape(Ez[:, :, l_low, M_in_low_s+ii], :)] # c_p is a nx*ny-by-1 column vector of transverse mode coefficients for p-polarization
+
+                        c_in_p[:] .= 0
                         if use_ind_in
-                            c_in[nx*ny+channels.low.ind_prop[ind_in_low_p[ii]]] = prefactor[ind_in_low_p[ii]]
+                            c_in_p[channels.low.ind_prop[ind_in_low_p[ii]]] = prefactor[ind_in_low_p[ii]]
                         else
-                            c_in[nx*ny.+channels.low.ind_prop] = prefactor.*v_in_low_p[:,ii]
+                            c_in_p[channels.low.ind_prop] = prefactor.*v_in_low_p[:,ii]
                         end
-                        c_out = c - c_in
-                        Ex_low[:,:,:,M_in_low_s+ii] = reshape([u_Ex.*reshape(alpha_x_all_low_s,1,:) u_Ex.*reshape(alpha_x_all_low_p,1,:)]*(c_in.*exp_pikz + c_out.*exp_mikz),nx_Ex,ny_Ex,nz_low_extra)
-                        Ey_low[:,:,:,M_in_low_s+ii] = reshape([u_Ey.*reshape(alpha_y_all_low_s,1,:) u_Ey.*reshape(alpha_y_all_low_p,1,:)]*(c_in.*exp_pikz + c_out.*exp_mikz),nx_Ey,ny_Ey,nz_low_extra)
-                        Ez_low[:,:,:,M_in_low_s+ii] = reshape([u_Ez*0 u_Ez.*reshape(alpha_z_all_low_p,1,:)]*(c_in.*exp_pikz + c_out.*exp_mikz),nx_Ez,ny_Ez,nz_low_extra)                            
+                        c_out_s = c_s - c_in_s
+                        c_out_p = c_p - c_in_p
+
+                        Ex_low[:,:,:,M_in_low_s+ii] = reshape(u_Ex.*reshape(alpha_x_all_low_s,1,:)*(c_in_s.*exp_pikz + c_out_s.*exp_mikz) + u_Ex.*reshape(alpha_x_all_low_p,1,:)*(c_in_p.*exp_pikz + c_out_p.*exp_mikz), nx_Ex,ny_Ex,nz_low_extra)
+                        Ey_low[:,:,:,M_in_low_s+ii] = reshape(u_Ey.*reshape(alpha_y_all_low_s,1,:)*(c_in_s.*exp_pikz + c_out_s.*exp_mikz) + u_Ey.*reshape(alpha_y_all_low_p,1,:)*(c_in_p.*exp_pikz + c_out_p.*exp_mikz), nx_Ey,ny_Ey,nz_low_extra)
+                        Ez_low[:,:,:,M_in_low_s+ii] = reshape(u_Ez.*reshape(alpha_z_all_low_s,1,:)*(c_in_s.*exp_pikz + c_out_s.*exp_mikz) + u_Ez.*reshape(alpha_z_all_low_p,1,:)*(c_in_p.*exp_pikz + c_out_p.*exp_mikz), nx_Ez,ny_Ez,nz_low_extra)                       
                     end
 
                     if two_sided
                         for ii = 1:M_in_high_s # s-polarized input from high
-                            c_out = u_low_prime*[reshape(Ex[:, :, l_low, M_in_low+ii], :); reshape(Ey[:, :, l_low, M_in_low+ii], :)] # c_out = c because there is no input on the high side
-                            Ex_low[:,:,:,M_in_low+ii] = reshape([u_Ex.*reshape(alpha_x_all_low_s,1,:) u_Ex.*reshape(alpha_x_all_low_p,1,:)]*(c_out.*exp_mikz),nx_Ex,ny_Ex,nz_low_extra)
-                            Ey_low[:,:,:,M_in_low+ii] = reshape([u_Ey.*reshape(alpha_y_all_low_s,1,:) u_Ey.*reshape(alpha_y_all_low_p,1,:)]*(c_out.*exp_mikz),nx_Ey,ny_Ey,nz_low_extra)
-                            Ez_low[:,:,:,M_in_low+ii] = reshape([u_Ez*0 u_Ez.*reshape(alpha_z_all_low_p,1,:)]*(c_out.*exp_mikz),nx_Ez,ny_Ez,nz_low_extra)
+                            # c_out_s = c_s because there is no input on the high side
+                            c_out_s = u_low_s_prime*[reshape(Ex[:, :, l_low, M_in_low+ii], :); reshape(Ey[:, :, l_low, M_in_low+ii], :); reshape(Ez[:, :, l_low, M_in_low+ii], :)]
+                            c_out_p = u_low_p_prime*[reshape(Ex[:, :, l_low, M_in_low+ii], :); reshape(Ey[:, :, l_low, M_in_low+ii], :); reshape(Ez[:, :, l_low, M_in_low+ii], :)]
+                            
+                            Ex_low[:,:,:,M_in_low+ii] = reshape(u_Ex.*reshape(alpha_x_all_low_s,1,:)*(c_out_s.*exp_mikz) + u_Ex.*reshape(alpha_x_all_low_p,1,:)*(c_out_p.*exp_mikz), nx_Ex,ny_Ex,nz_low_extra)
+                            Ey_low[:,:,:,M_in_low+ii] = reshape(u_Ey.*reshape(alpha_y_all_low_s,1,:)*(c_out_s.*exp_mikz) + u_Ey.*reshape(alpha_y_all_low_p,1,:)*(c_out_p.*exp_mikz), nx_Ey,ny_Ey,nz_low_extra)
+                            Ez_low[:,:,:,M_in_low+ii] = reshape(u_Ez.*reshape(alpha_z_all_low_s,1,:)*(c_out_s.*exp_mikz) + u_Ez.*reshape(alpha_z_all_low_p,1,:)*(c_out_p.*exp_mikz), nx_Ez,ny_Ez,nz_low_extra)
                         end
                         for ii = 1:M_in_high_p # p-polarized input from high
-                            c_out = u_low_prime*[reshape(Ex[:, :, l_low, M_in_low+M_in_high_s+ii], :); reshape(Ey[:, :, l_low, M_in_low+M_in_high_s+ii], :)] # c_out = c because there is no input on the high side
-                            Ex_low[:,:,:,M_in_low+M_in_high_s+ii] = reshape([u_Ex.*reshape(alpha_x_all_low_s,1,:) u_Ex.*reshape(alpha_x_all_low_p,1,:)]*(c_out.*exp_mikz),nx_Ex,ny_Ex,nz_low_extra)
-                            Ey_low[:,:,:,M_in_low+M_in_high_s+ii] = reshape([u_Ey.*reshape(alpha_y_all_low_s,1,:) u_Ey.*reshape(alpha_y_all_low_p,1,:)]*(c_out.*exp_mikz),nx_Ey,ny_Ey,nz_low_extra)
-                            Ez_low[:,:,:,M_in_low+M_in_high_s+ii] = reshape([u_Ez*0 u_Ez.*reshape(alpha_z_all_low_p,1,:)]*(c_out.*exp_mikz),nx_Ez,ny_Ez,nz_low_extra)                                
+                            # c_out_s = c_s because there is no input on the high side
+                            c_out_s = u_low_s_prime*[reshape(Ex[:, :, l_low, M_in_low+M_in_high_s+ii], :); reshape(Ey[:, :, l_low, M_in_low+M_in_high_s+ii], :); reshape(Ez[:, :, l_low, M_in_low+M_in_high_s+ii], :)]
+                            c_out_p = u_low_p_prime*[reshape(Ex[:, :, l_low, M_in_low+M_in_high_s+ii], :); reshape(Ey[:, :, l_low, M_in_low+M_in_high_s+ii], :); reshape(Ez[:, :, l_low, M_in_low+M_in_high_s+ii], :)]
+
+                            Ex_low[:,:,:,M_in_low+M_in_high_s+ii] = reshape(u_Ex.*reshape(alpha_x_all_low_s,1,:)*(c_out_s.*exp_mikz) + u_Ex.*reshape(alpha_x_all_low_p,1,:)*(c_out_p.*exp_mikz), nx_Ex,ny_Ex,nz_low_extra)
+                            Ey_low[:,:,:,M_in_low+M_in_high_s+ii] = reshape(u_Ey.*reshape(alpha_y_all_low_s,1,:)*(c_out_s.*exp_mikz) + u_Ey.*reshape(alpha_y_all_low_p,1,:)*(c_out_p.*exp_mikz), nx_Ey,ny_Ey,nz_low_extra)
+                            Ez_low[:,:,:,M_in_low+M_in_high_s+ii] = reshape(u_Ez.*reshape(alpha_z_all_low_s,1,:)*(c_out_s.*exp_mikz) + u_Ez.*reshape(alpha_z_all_low_p,1,:)*(c_out_p.*exp_mikz), nx_Ez,ny_Ez,nz_low_extra)
                         end
                     end
                     Ex = cat(Ex_low, Ex, dims=3)
@@ -2544,59 +2586,76 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
                         Ez_high = zeros(ComplexF64, nx_Ez, ny_Ez, nz_high_extra, size(Ez,4))                
                         # The n below is l = l - l_high, where l_high is the location of the inputs/outputs on the high surface.
                         l = 1:nz_high_extra
+
+                        # What is the case nx_Ex != nx_Ey != nx_Ez?
+                        # What is the case ny_Ex != ny_Ey != ny_Ez?
+                        
                         nx = maximum([nx_Ex,nx_Ey])
                         ny = maximum([ny_Ex,ny_Ey])
-                        kz_z = [repeat(reshape(channels.high.kzdx_all, nx*ny, 1),2,1)].*reshape(l, 1, :) # kz*z; 2*nx*ny-by-nz_low_extra matrix through implicit expansion
+                        kz_z = reshape(channels.high.kzdx_all, nx*ny, 1).*reshape(l, 1, :) # kz*z; nx*ny-by-nz_low_extra matrix through implicit expansion
                         exp_pikz = exp.( 1im*kz_z) # exp(+i*kz*z)
                         exp_mikz = exp.(-1im*kz_z) # exp(-i*kz*z)
-                        c_in = zeros(ComplexF64, 2*nx*ny, 1)
+                        c_in_s = zeros(ComplexF64, nx*ny, 1)
+                        c_in_p = zeros(ComplexF64, nx*ny, 1)
                         l_high = size(Ex, 3) # index for the inputs/outputs on the high surface
 
                         for ii = 1:M_in_low_s # s-polarized input from low
-                            c_out = u_high_prime*[reshape(Ex[:, :, l_high, ii], :); reshape(Ey[:, :, l_high, ii], :)] # c_out = c because there is no input on the high side
-                            Ex_high[:,:,:,ii] = reshape([u_Ex.*reshape(alpha_x_all_high_s,1,:) u_Ex.*reshape(alpha_x_all_high_p,1,:)]*(c_out.*exp_pikx),nx_Ex,ny_Ex,nz_high_extra)
-                            Ey_high[:,:,:,ii] = reshape([u_Ey.*reshape(alpha_y_all_high_s,1,:) u_Ey.*reshape(alpha_y_all_high_p,1,:)]*(c_out.*exp_pikx),nx_Ey,ny_Ey,nz_high_extra)
-                            Ez_high[:,:,:,ii] = reshape([u_Ez*0 u_Ez.*reshape(alpha_z_all_high_p,1,:)]*(c_out.*exp_pikx),nx_Ez,ny_Ez,nz_high_extra)
+                            # c_out_s = c_s because there is no input on the low side
+                            c_out_s = u_low_s_prime*[reshape(Ex[:, :, l_high, ii], :); reshape(Ey[:, :, l_high, ii], :); reshape(Ez[:, :, l_high+1, ii], :)] 
+                            c_out_p = u_low_p_prime*[reshape(Ex[:, :, l_high, ii], :); reshape(Ey[:, :, l_high, ii], :); reshape(Ez[:, :, l_high+1, ii], :)] 
+
+                            Ex_high[:,:,:,ii] = reshape(u_Ex.*reshape(alpha_x_all_high_s,1,:)*(c_out_s.*exp_pikx) + u_Ex.*reshape(alpha_x_all_high_p,1,:)*(c_out_p.*exp_pikx), nx_Ex,ny_Ex,nz_high_extra)
+                            Ey_high[:,:,:,ii] = reshape(u_Ey.*reshape(alpha_y_all_high_s,1,:)*(c_out_s.*exp_pikx) + u_Ey.*reshape(alpha_y_all_high_p,1,:)*(c_out_p.*exp_pikx), nx_Ey,ny_Ey,nz_high_extra)
+                            Ez_high[:,:,:,ii] = reshape(u_Ez.*reshape(alpha_z_all_high_s,1,:)*(c_out_s.*exp_pikx) + u_Ez.*reshape(alpha_z_all_high_p,1,:)*(c_out_p.*exp_pikx), nx_Ez,ny_Ez,nz_high_extra)
                         end                            
 
                         for ii = 1:M_in_low_p # p-polarized input from low
-                            c_out = u_high_prime*[reshape(Ex[:, :, l_high, M_in_low_s+ii], :); reshape(Ey[:, :, l_high, M_in_low_s+ii], :)] # c_out = c because there is no input on the high side
-                            Ex_high[:,:,:,M_in_low_s+ii] = reshape([u_Ex.*reshape(alpha_x_all_high_s,1,:) u_Ex.*reshape(alpha_x_all_high_p,1,:)]*(c_out.*exp_pikx),nx_Ex,ny_Ex,nz_high_extra)
-                            Ey_high[:,:,:,M_in_low_s+ii] = reshape([u_Ey.*reshape(alpha_y_all_high_s,1,:) u_Ey.*reshape(alpha_y_all_high_p,1,:)]*(c_out.*exp_pikx),nx_Ey,ny_Ey,nz_high_extra)
-                            Ez_high[:,:,:,M_in_low_s+ii] = reshape([u_Ez*0 u_Ez.*reshape(alpha_z_all_high_p,1,:)]*(c_out.*exp_pikx),nx_Ez,ny_Ez,nz_high_extra)                                
+                            # c_out_s = c_s because there is no input on the low side
+                            c_out_s = u_low_s_prime*[reshape(Ex[:, :, l_high, M_in_low_s+ii], :); reshape(Ey[:, :, l_high, M_in_low_s+ii], :); reshape(Ez[:, :, l_high+1, M_in_low_s+ii], :)] 
+                            c_out_p = u_low_p_prime*[reshape(Ex[:, :, l_high, M_in_low_s+ii], :); reshape(Ey[:, :, l_high, M_in_low_s+ii], :); reshape(Ez[:, :, l_high+1, M_in_low_s+ii], :)] 
+
+                            Ex_high[:,:,:,M_in_low_s+ii] = reshape(u_Ex.*reshape(alpha_x_all_high_s,1,:)*(c_out_s.*exp_pikx) + u_Ex.*reshape(alpha_x_all_high_p,1,:)*(c_out_p.*exp_pikx), nx_Ex,ny_Ex,nz_high_extra)
+                            Ey_high[:,:,:,M_in_low_s+ii] = reshape(u_Ey.*reshape(alpha_y_all_high_s,1,:)*(c_out_s.*exp_pikx) + u_Ey.*reshape(alpha_y_all_high_p,1,:)*(c_out_p.*exp_pikx), nx_Ey,ny_Ey,nz_high_extra)
+                            Ez_high[:,:,:,M_in_low_s+ii] = reshape(u_Ez.*reshape(alpha_z_all_high_s,1,:)*(c_out_s.*exp_pikx) + u_Ez.*reshape(alpha_z_all_high_p,1,:)*(c_out_p.*exp_pikx), nx_Ez,ny_Ez,nz_high_extra)
                         end
 
                         if M_in_high_s > 0 || M_in_high_p > 0
                             prefactor = reshape(exp.((-1im*dn)*channels.high.kzdx_prop)./channels.high.sqrt_nu_prop, N_prop_high, 1)                                
                         end
                         for ii = 1:M_in_high_s # s-polarized input from high
-                            c = u_high_prime*[reshape(Ex[:, :, l_high, M_in_low+ii], :); reshape(Ey[:, :, l_high, M_in_low+ii], :)] # c is a 2*nx*ny-by-1 column vector of transverse mode coefficients
-                            # c_in is the incident wavefront at n_R; note we need to back propagate dn pixel from z=d
-                            c_in[:] .= 0
+                            c_s = u_high_s_prime*[reshape(Ex[:, :, l_high, M_in_low+ii], :); reshape(Ey[:, :, l_high, M_in_low+ii], :); reshape(Ez[:, :, l_high+1, M_in_low+ii], :)] # c_s is a nx*ny-by-1 column vector of transverse mode coefficients
+                            c_p = u_high_p_prime*[reshape(Ex[:, :, l_high, M_in_low+ii], :); reshape(Ey[:, :, l_high, M_in_low+ii], :); reshape(Ez[:, :, l_high+1, M_in_low+ii], :)] # c_p is a nx*ny-by-1 column vector of transverse mode coefficients
+
+                            c_in_s[:] .= 0
                             if use_ind_in
-                                c_in[channels.high.ind_prop[ind_in_high_s[ii]]] = prefactor[ind_in_high_s[ii]]
+                                c_in_s[channels.high.ind_prop[ind_in_high_s[ii]]] = prefactor[ind_in_high_s[ii]]
                             else
-                                c_in[channels.high.ind_prop] = prefactor_Ex.*v_in_high_s[:,ii]
+                                c_in_s[channels.high.ind_prop] = prefactor.*v_in_high_s[:,ii]
                             end
-                            c_out = c - c_in
-                            Ex_high[:,:,:,M_in_low+ii] = reshape([u_Ex.*reshape(alpha_x_all_high_s,1,:) u_Ex.*reshape(alpha_x_all_high_p,1,:)]*(c_in.*exp_mikz + c_out.*exp_pikz),nx_Ex,ny_Ex,nz_high_extra)
-                            Ey_high[:,:,:,M_in_low+ii] = reshape([u_Ey.*reshape(alpha_y_all_high_s,1,:) u_Ey.*reshape(alpha_y_all_high_p,1,:)]*(c_in.*exp_mikz + c_out.*exp_pikz),nx_Ey,ny_Ey,nz_high_extra)
-                            Ez_high[:,:,:,M_in_low+ii] = reshape([u_Ez.*0 u_Ez.*reshape(alpha_z_all_high_p,1,:)]*(c_in.*exp_mikz + c_out.*exp_pikz),nx_Ez,ny_Ez,nz_high_extra)
+                            c_out_s = c_s - c_in_s
+                            c_out_p = c_p - c_in_p
+
+                            Ex_high[:,:,:,M_in_low+ii] = reshape(u_Ex.*reshape(alpha_x_all_high_s,1,:)*(c_in_s.*exp_mikz + c_out_s.*exp_pikz) + u_Ex.*reshape(alpha_x_all_high_p,1,:)*(c_in_p.*exp_mikz + c_out_p.*exp_pikz), nx_Ex,ny_Ex,nz_high_extra)
+                            Ey_high[:,:,:,M_in_low+ii] = reshape(u_Ey.*reshape(alpha_y_all_high_s,1,:)*(c_in_s.*exp_mikz + c_out_s.*exp_pikz) + u_Ey.*reshape(alpha_y_all_high_p,1,:)*(c_in_p.*exp_mikz + c_out_p.*exp_pikz), nx_Ey,ny_Ey,nz_high_extra)
+                            Ez_high[:,:,:,M_in_low+ii] = reshape(u_Ez.*reshape(alpha_z_all_high_s,1,:)*(c_in_s.*exp_mikz + c_out_s.*exp_pikz) + u_Ez.*reshape(alpha_z_all_high_p,1,:)*(c_in_p.*exp_mikz + c_out_p.*exp_pikz), nx_Ez,ny_Ez,nz_high_extra)
                         end
 
                         for ii = 1:M_in_high_p # p-polarized input from high
-                            c = u_high_prime*[reshape(Ex[:, :, l_high, M_in_low+M_in_high_s+ii], :); reshape(Ey[:, :, l_high, M_in_low+M_in_high_s+ii], :)] # c is a 2*nx*ny-by-1 column vector of transverse mode coefficients
-                            # c_in is the incident wavefront at n_R; note we need to back propagate dn pixel from z=d
-                            c_in[:] .= 0
+                            c_s = u_high_s_prime*[reshape(Ex[:, :, l_high, M_in_low+M_in_high_s+ii], :); reshape(Ey[:, :, l_high, M_in_low+M_in_high_s+ii], :); reshape(Ez[:, :, l_high+1, M_in_low+M_in_high_s+ii], :)] # c_s is a nx*ny-by-1 column vector of transverse mode coefficients
+                            c_p = u_high_p_prime*[reshape(Ex[:, :, l_high, M_in_low+M_in_high_s+ii], :); reshape(Ey[:, :, l_high, M_in_low+M_in_high_s+ii], :); reshape(Ez[:, :, l_high+1, M_in_low+M_in_high_s+ii], :)] # c_p is a nx*ny-by-1 column vector of transverse mode coefficients
+                            
+                            c_in_p[:] .= 0
                             if use_ind_in
-                                c_in[nx*ny+channels.high.ind_prop[ind_in_high_s[ii]]] = prefactor[ind_in_high_p[ii]]
+                                c_in_p[channels.high.ind_prop[ind_in_high_s[ii]]] = prefactor[ind_in_high_p[ii]]
                             else
-                                c_in[nx*ny.+channels.high.ind_prop] = prefactor_Ex.*v_in_high_p[:,ii]
+                                c_in_p[channels.high.ind_prop] = prefactor.*v_in_high_p[:,ii]
                             end
-                            c_out = c - c_in
-                            Ex_high[:,:,:,M_in_low+M_in_high_s+ii] = reshape([u_Ex.*reshape(alpha_x_all_high_s,1,:) u_Ex.*reshape(alpha_x_all_high_p,1,:)]*(c_in.*exp_mikz + c_out.*exp_pikz),nx_Ex,ny_Ex,nz_high_extra)
-                            Ey_high[:,:,:,M_in_low+M_in_high_s+ii] = reshape([u_Ey.*reshape(alpha_y_all_high_s,1,:) u_Ey.*reshape(alpha_y_all_high_p,1,:)]*(c_in.*exp_mikz + c_out.*exp_pikz),nx_Ey,ny_Ey,nz_high_extra)
-                            Ez_high[:,:,:,M_in_low+M_in_high_s+ii] = reshape([u_Ez.*0 u_Ez.*reshape(alpha_z_all_high_p,1,:)]*(c_in.*exp_mikz + c_out.*exp_pikz),nx_Ez,ny_Ez,nz_high_extra)
+                            c_out_s = c_s - c_in_s
+                            c_out_p = c_p - c_in_p
+
+                            Ex_high[:,:,:,M_in_low+M_in_high_s+ii] = reshape(u_Ex.*reshape(alpha_x_all_high_s,1,:)*(c_in_s.*exp_mikz + c_out_s.*exp_pikz) + u_Ex.*reshape(alpha_x_all_high_p,1,:)*(c_in_p.*exp_mikz + c_out_p.*exp_pikz), nx_Ex,ny_Ex,nz_high_extra)
+                            Ey_high[:,:,:,M_in_low+M_in_high_s+ii] = reshape(u_Ey.*reshape(alpha_y_all_high_s,1,:)*(c_in_s.*exp_mikz + c_out_s.*exp_pikz) + u_Ey.*reshape(alpha_y_all_high_p,1,:)*(c_in_p.*exp_mikz + c_out_p.*exp_pikz), nx_Ey,ny_Ey,nz_high_extra)
+                            Ez_high[:,:,:,M_in_low+M_in_high_s+ii] = reshape(u_Ez.*reshape(alpha_z_all_high_s,1,:)*(c_in_s.*exp_mikz + c_out_s.*exp_pikz) + u_Ez.*reshape(alpha_z_all_high_p,1,:)*(c_in_p.*exp_mikz + c_out_p.*exp_pikz), nx_Ez,ny_Ez,nz_high_extra)
                         end
                         Ex = cat(Ex, Ex_high, dims=3)
                         Ey = cat(Ey, Ey_high, dims=3)

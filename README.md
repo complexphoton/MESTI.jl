@@ -65,10 +65,8 @@ To install MESTI.jl, open Julia REPL and type:
 
 ```julia
 using Pkg; Pkg.add(PackageSpec(url="http://github.com/wrs28/MUMPS3.jl", rev="5.3.3-update"))
-Pkg.add("MESTI")
+Pkg.add(url="https://github.com/complexphoton/MESTI.jl")
 ```
-
-Note if you want to download the latest MESTI.jl (i.e. this main branch) instead of a released version of MESTI.jl, you can replace the command, you can replace```Pkg.add("MESTI")``` with  ```Pkg.add(url="https://github.com/complexphoton/MESTI.jl")```
 
 After installing MESTI.jl, you may also install other necessary packages which you will utilize in the examples by running <code>[install_packages.jl](./mumps/install_packages.jl)</code>
 
