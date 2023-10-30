@@ -38,7 +38,7 @@
             For Dirichlet, we intend to maintain the trivial solution in this transverse function,
             since it would give us non-trivial solution in another component when we build up 
             2D transverse function.
-        kxdx_all (1-by-nx_Ex+delat_(xBC,"Dirichlet") real row vector):
+        kxdx_all (1-by-nx_Ex+delta_(xBC,"Dirichlet") real row vector):
             Dimensionless transverse wave number kx*dx for all ny channels,
             including both propagating and evanescent ones. They are real-valued
             and are ordered from small to large. 

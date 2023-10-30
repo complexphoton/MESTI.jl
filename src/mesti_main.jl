@@ -1249,25 +1249,34 @@ function mesti(syst::Syst, B::Union{SparseMatrixCSC{Int64,Int64},SparseMatrixCSC
                         m2 = m1 + pos[5] - 1 # last index in y
                         l2 = l1 + pos[6] - 1 # last index in z
                         nxyz_data = pos[4]*pos[5]*pos[6]; # number of elements in this cuboid
-                        
                         if n1 > nx_list[ii]
-                            temp = @eval $(Symbol(string("nx_","E","$(component[ii])")))
-                            throw(ArgumentError("B[$ii].pos[$jj][1] = $(n1) exceeds nx_E$(component[ii]) = $(temp)."))
+                            if ii == 1; throw(ArgumentError("B[$ii].pos[$jj][1] = $(n1) exceeds nx_E$(component[ii]) = $(nx_Ex).")); end
+                            if ii == 2; throw(ArgumentError("B[$ii].pos[$jj][1] = $(n1) exceeds nx_E$(component[ii]) = $(nx_Ey).")); end
+                            if ii == 3; throw(ArgumentError("B[$ii].pos[$jj][1] = $(n1) exceeds nx_E$(component[ii]) = $(nx_Ez).")); end
                         elseif m1 > ny_list[ii]
-                            temp = @eval $(Symbol(string("ny_","E","$(component[ii])"))) 
-                            throw(ArgumentError("B[$ii].pos[$jj][2] = $(m1) exceeds ny_E$(component[ii]) = $(temp)."))
+                            temp = 2 - use_2D_TM
+                            if ii == 1; throw(ArgumentError("B[$ii].pos[$jj][$temp] = $(m1) exceeds ny_E$(component[ii]) = $(ny_Ex).")); end
+                            if ii == 2; throw(ArgumentError("B[$ii].pos[$jj][$temp] = $(m1) exceeds ny_E$(component[ii]) = $(ny_Ey).")); end
+                            if ii == 3; throw(ArgumentError("B[$ii].pos[$jj][$temp] = $(m1) exceeds ny_E$(component[ii]) = $(ny_Ez).")); end
                         elseif l1 > nz_list[ii]
-                            temp = @eval $(Symbol(string("nz_","E","$(component[ii])"))) 
-                            throw(ArgumentError("B[$ii].pos[$jj][3] = $(m1) exceeds nz_E$(component[ii]) = $(temp)."))
+                            temp = 3 - use_2D_TM
+                            if ii == 1; throw(ArgumentError("B[$ii].pos[$jj][$temp] = $(l1) exceeds nz_E$(component[ii]) = $(nz_Ex).")); end
+                            if ii == 2; throw(ArgumentError("B[$ii].pos[$jj][$temp] = $(l1) exceeds nz_E$(component[ii]) = $(nz_Ey).")); end
+                            if ii == 3; throw(ArgumentError("B[$ii].pos[$jj][$temp] = $(l1) exceeds nz_E$(component[ii]) = $(nz_Ez).")); end
                         elseif n2 > nx_list[ii]
-                            temp = @eval $(Symbol(string("nx_","E","$(component[ii])")))
-                            throw(ArgumentError("B[$ii].pos[$jj][1] + B[$ii].pos[$jj][4] - 1 = $(n2) exceeds nx_E$(component[ii]) = $(temp)."))
+                            if ii == 1; throw(ArgumentError("B[$ii].pos[$jj][1] + B[$ii].pos[$jj][4] - 1 = $(n2) exceeds nx_E$(component[ii]) = $(nx_Ex).")); end
+                            if ii == 2; throw(ArgumentError("B[$ii].pos[$jj][1] + B[$ii].pos[$jj][4] - 1 = $(n2) exceeds nx_E$(component[ii]) = $(nx_Ey).")); end
+                            if ii == 3; throw(ArgumentError("B[$ii].pos[$jj][1] + B[$ii].pos[$jj][4] - 1 = $(n2) exceeds nx_E$(component[ii]) = $(nx_Ez).")); end
                         elseif m2 > ny_list[ii]
-                            temp = @eval $(Symbol(string("ny_","E","$(component[ii])")))
-                            throw(ArgumentError("B[$ii].pos[$jj][2] + B[$ii].pos[$jj][5] - 1 = $(m2) exceeds ny_E$(component[ii]) = $(temp)."))                       
+                            temp = 2 - use_2D_TM
+                            if ii == 1; throw(ArgumentError("B[$ii].pos[$jj][$temp] + B[$ii].pos[$jj][$(temp*2+1)] - 1 = $(m2) exceeds ny_E$(component[ii]) = $(ny_Ex).")); end
+                            if ii == 2; throw(ArgumentError("B[$ii].pos[$jj][$temp] + B[$ii].pos[$jj][$(temp*2+1)] - 1 = $(m2) exceeds ny_E$(component[ii]) = $(ny_Ey).")); end
+                            if ii == 3; throw(ArgumentError("B[$ii].pos[$jj][$temp] + B[$ii].pos[$jj][$(temp*2+1)] - 1 = $(m2) exceeds ny_E$(component[ii]) = $(ny_Ez).")); end
                         elseif l2 > nz_list[ii]
-                            temp = @eval $(Symbol(string("nz_","E","$(component[ii])")))
-                            throw(ArgumentError("B[$ii].pos[$jj][3] + B[$ii].pos[$jj][6] - 1 = $(l2) exceeds nz_E$(component[ii]) = $(temp)."))                       
+                            temp = 3 - use_2D_TM                            
+                            if ii == 1; throw(ArgumentError("B[$ii].pos[$jj][$temp] + B[$ii].pos[$jj][$(temp*2)] - 1 = $(l2) exceeds nz_E$(component[ii]) = $(nz_Ex).")); end
+                            if ii == 2; throw(ArgumentError("B[$ii].pos[$jj][$temp] + B[$ii].pos[$jj][$(temp*2)] - 1 = $(l2) exceeds nz_E$(component[ii]) = $(nz_Ey).")); end
+                            if ii == 3; throw(ArgumentError("B[$ii].pos[$jj][$temp] + B[$ii].pos[$jj][$(temp*2)] - 1 = $(l2) exceeds nz_E$(component[ii]) = $(nz_Ez).")); end
                         elseif (~use_2D_TM && ~(ndims(data) == 2 || ndims(data) == 4)) || (use_2D_TM && ~(ndims(data) == 2 || ndims(data) == 3))
                             throw(ArgumentError("B[$ii].data[$jj] must be a 2D or 4D numeric array for 3D systems, or a 2D or 3D numeric array for 2D systems, when B[$ii].pos[$jj] is given."))
                         end
@@ -1459,23 +1468,33 @@ function mesti(syst::Syst, B::Union{SparseMatrixCSC{Int64,Int64},SparseMatrixCSC
                         l2 = l1 + pos[6] - 1 # last index in z
                         nxyz_data = pos[4]*pos[5]*pos[6]; # number of elements in this cuboid
                         if n1 > nx_list[ii]
-                            temp = @eval $(Symbol(string("nx_","E","$(component[ii])")))
-                            throw(ArgumentError("C[$ii].pos[$jj][1] = $(n1) exceeds E$(component[ii])_nx = $(temp)."))
+                            if ii == 1; throw(ArgumentError("C[$ii].pos[$jj][1] = $(n1) exceeds nx_E$(component[ii]) = $(nx_Ex).")); end
+                            if ii == 2; throw(ArgumentError("C[$ii].pos[$jj][1] = $(n1) exceeds nx_E$(component[ii]) = $(nx_Ey).")); end
+                            if ii == 3; throw(ArgumentError("C[$ii].pos[$jj][1] = $(n1) exceeds nx_E$(component[ii]) = $(nx_Ez).")); end
                         elseif m1 > ny_list[ii]
-                            temp = @eval $(Symbol(string("ny_","E","$(component[ii])"))) 
-                            throw(ArgumentError("C[$ii].pos[$jj][2] = $(m1) exceeds E$(component[ii])_ny = $(temp)."))
+                            temp = 2 - use_2D_TM
+                            if ii == 1; throw(ArgumentError("C[$ii].pos[$jj][$temp] = $(m1) exceeds ny_E$(component[ii]) = $(ny_Ex).")); end
+                            if ii == 2; throw(ArgumentError("C[$ii].pos[$jj][$temp] = $(m1) exceeds ny_E$(component[ii]) = $(ny_Ey).")); end
+                            if ii == 3; throw(ArgumentError("C[$ii].pos[$jj][$temp] = $(m1) exceeds ny_E$(component[ii]) = $(ny_Ez).")); end
                         elseif l1 > nz_list[ii]
-                            temp = @eval $(Symbol(string("nz_","E","$(component[ii])"))) 
-                            throw(ArgumentError("C[$ii].pos[$jj][3] = $(m1) exceeds E$(component[ii])_nz = $(temp)."))
+                            temp = 3 - use_2D_TM
+                            if ii == 1; throw(ArgumentError("C[$ii].pos[$jj][$temp] = $(l1) exceeds nz_E$(component[ii]) = $(nz_Ex).")); end
+                            if ii == 2; throw(ArgumentError("C[$ii].pos[$jj][$temp] = $(l1) exceeds nz_E$(component[ii]) = $(nz_Ey).")); end
+                            if ii == 3; throw(ArgumentError("C[$ii].pos[$jj][$temp] = $(l1) exceeds nz_E$(component[ii]) = $(nz_Ez).")); end
                         elseif n2 > nx_list[ii]
-                            temp = @eval $(Symbol(string("nx_","E","$(component[ii])")))
-                            throw(ArgumentError("C[$ii].pos[$jj][1] + C[$ii].pos[$jj][4] - 1 = $(n2) nx_E$(component[ii]) = $(temp)."))
+                            if ii == 1; throw(ArgumentError("C[$ii].pos[$jj][1] + C[$ii].pos[$jj][4] - 1 = $(n2) exceeds nx_E$(component[ii]) = $(nx_Ex).")); end
+                            if ii == 2; throw(ArgumentError("C[$ii].pos[$jj][1] + C[$ii].pos[$jj][4] - 1 = $(n2) exceeds nx_E$(component[ii]) = $(nx_Ey).")); end
+                            if ii == 3; throw(ArgumentError("C[$ii].pos[$jj][1] + C[$ii].pos[$jj][4] - 1 = $(n2) exceeds nx_E$(component[ii]) = $(nx_Ez).")); end
                         elseif m2 > ny_list[ii]
-                            temp = @eval $(Symbol(string("ny_","E","$(component[ii])")))
-                            throw(ArgumentError("C[$ii].pos[$jj][2] + C[$ii].pos[$jj][5] - 1 = $(m2) ny_E$(component[ii]) = $(temp)."))                      
+                            temp = 2 - use_2D_TM
+                            if ii == 1; throw(ArgumentError("C[$ii].pos[$jj][$temp] + C[$ii].pos[$jj][$(temp*2+1)] - 1 = $(m2) exceeds ny_E$(component[ii]) = $(ny_Ex).")); end
+                            if ii == 2; throw(ArgumentError("C[$ii].pos[$jj][$temp] + C[$ii].pos[$jj][$(temp*2+1)] - 1 = $(m2) exceeds ny_E$(component[ii]) = $(ny_Ey).")); end
+                            if ii == 3; throw(ArgumentError("C[$ii].pos[$jj][$temp] + C[$ii].pos[$jj][$(temp*2+1)] - 1 = $(m2) exceeds ny_E$(component[ii]) = $(ny_Ez).")); end
                         elseif l2 > nz_list[ii]
-                            temp = @eval $(Symbol(string("nz_","E","$(component[ii])")))
-                            throw(ArgumentError("C[$ii].pos[$jj][3] + C[$ii].pos[$jj][6] - 1 = $(l2) nz_E$(component[ii]) = $(temp)."))                      
+                            temp = 3 - use_2D_TM                            
+                            if ii == 1; throw(ArgumentError("C[$ii].pos[$jj][$temp] + C[$ii].pos[$jj][$(temp*2)] - 1 = $(l2) exceeds nz_E$(component[ii]) = $(nz_Ex).")); end
+                            if ii == 2; throw(ArgumentError("C[$ii].pos[$jj][$temp] + C[$ii].pos[$jj][$(temp*2)] - 1 = $(l2) exceeds nz_E$(component[ii]) = $(nz_Ey).")); end
+                            if ii == 3; throw(ArgumentError("C[$ii].pos[$jj][$temp] + C[$ii].pos[$jj][$(temp*2)] - 1 = $(l2) exceeds nz_E$(component[ii]) = $(nz_Ez).")); end
                         elseif (~use_2D_TM && ~(ndims(data) == 2 || ndims(data) == 4)) || (use_2D_TM && ~(ndims(data) == 2 || ndims(data) == 3))
                             throw(ArgumentError("C[$ii].data[$jj] must be a 2D or 4D numeric array for 3D systems, or a 2D or 3D numeric array for 2D systems, when C[$ii].pos[$jj] is given."))
                         end
