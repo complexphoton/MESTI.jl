@@ -486,8 +486,9 @@ end
             opts.solver (string; optional):
                 The solver used for sparse matrix factorization. Available choices
                 are (case-insensitive):
-                    "MUMPS"  - (default when MUMPS is available) Use MUMPS. Its JULIA 
-                            interface MUMPS3.jl must be installed.
+                    "MUMPS"  - (default when MUMPS is available) To use MUMPS, MUMPS must
+                            be installed and the Julia environment variable "MUMPS_PREFIX"
+                            should be specified.
                     "JULIA" -  (default when MUMPS is not available) Uses the built-in 
                             lu() function in JULIA, which uses UMFPACK. 
                 MUMPS is faster and uses less memory than lu(), and is required for

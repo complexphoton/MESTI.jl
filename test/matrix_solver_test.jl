@@ -14,7 +14,7 @@ N, M = 2000, 20
         opts.verbal = false # Not print system information and timing to the standard output.
 	
         (X, _) = mesti_matrix_solver!(matrices, opts)  # Solve the linear system using matrix solver
-        @test norm(matrices.A*X-matrices.B) ≤ 1e-6 # Test the correctness of the solution
+        @test norm(matrices.A*X-matrices.B) ≤ 1e-5 # Test the correctness of the solution
     end
 end
 

@@ -6,11 +6,15 @@ using Statistics
 using TensorCast
 using LazyGrids
 using Printf
-# If users specfiy the ENV["MUMPS_PREFIX"], they want to utilize MUMPS, so using MUMPS3 and MPI
-if haskey(ENV, "MUMPS_PREFIX")
-    using MUMPS3
-    using MPI
-end
+using Libdl
+using MPI
+
+include("mumps3_types.jl")
+include("mumps3_struc.jl")
+include("mumps3_interface.jl")
+include("mumps3_convenience_wrappers.jl")
+include("mumps3_icntl_alibis.jl")
+include("mumps3_printing.jl")
 
 include("get_optimal_PML.jl")
 include("build_transverse_function_1d.jl")

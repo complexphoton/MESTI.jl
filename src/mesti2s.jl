@@ -445,8 +445,9 @@ end
             opts.solver (string; optional):
                 The solver used for sparse matrix factorization. Available choices
                 are (case-insensitive):
-                    "MUMPS"  - (default when MUMPS is available) Use MUMPS. Its JULIA 
-                            interface MUMPS3.jl must be installed.
+                    "MUMPS"  - (default when MUMPS is available) To use MUMPS, MUMPS must
+	                    be installed and the Julia environment variable "MUMPS_PREFIX"
+	                    should be specified.
                     "JULIA" -  (default when MUMPS is not available) Uses the built-in 
                             lu() function in JULIA, which uses UMFPACK. 
                 MUMPS is faster and uses less memory than lu(), and is required for
@@ -954,7 +955,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
     end
 
     # Use MUMPS for opts.solver when it is available
-    MUMPS_available = @isdefined(Mumps)
+    MUMPS_available = haskey(ENV,"MUMPS_PREFIX")
     solver_specified = true   
     if ~isdefined(opts, :solver) || isa(opts.solver, Nothing)
         solver_specified = false
@@ -968,7 +969,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
         if ~(opts.solver in ["MUMPS", "JULIA"])
             throw(ArgumentError("opts.solver = \"$(opts.solver)\" is not a supported option; use \"MUMPS\" or \"JULIA\"."))
         elseif opts.solver == "MUMPS" && ~MUMPS_available
-            throw(ArgumentError("opts.solver = \"$(opts.solver)\" but package MUMPS3.jl is not found."))
+            throw(ArgumentError("opts.solver = \"$(opts.solver)\" but the Julia environment variable \"MUMPS_PREFIX\" is not specified."))
         end
     end
 

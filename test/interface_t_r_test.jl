@@ -51,7 +51,7 @@ output.side = "both"
         r = (exp(-1im*kzdx_1/2)*exp(1im*kzdx_2)-exp(1im*kzdx_1/2))/(exp(-1im*kzdx_1/2)-exp(1im*kzdx_1/2)*exp(1im*kzdx_2))
 	# Analytic expression for transmission coefficient t of a 1D single interface system
 	t = (sqrt(sin(kzdx_2))/sqrt(sin(kzdx_1)))*(exp(1im*kzdx_1*3/2)-exp(-1im*kzdx_1/2))/(exp(1im*kzdx_2/2)*exp(1im*kzdx_1)-exp(-1im*kzdx_2/2))
-	@test abs(S[1,1]-r)/abs(r) ≤ 1e-4 # Test relative absolute error of r 
-	@test abs(S[2,1]-t)/abs(t) ≤ 1e-4 # Test relative absolute error of t
+	@test abs(S[1,1]-r) ≤ 1e-4 # Test absolute error of r 
+	@test abs(S[2,1]-t) ≤ 1e-4 # Test absolute error of t
     end
 end

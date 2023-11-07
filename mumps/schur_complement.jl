@@ -3,7 +3,7 @@
 # specifically focusing on computing the Schur complement, which MESTI would utilize in APF method.
 
 # Import necessary packages
-using MUMPS3, MPI, LinearAlgebra, SparseArrays, Statistics, Test
+using MESTI, MPI, LinearAlgebra, SparseArrays, Statistics, Test
 
 # Check if MPI is initialized, and initialize if not
 MPI.Initialized() ? nothing : MPI.Init()

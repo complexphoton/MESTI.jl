@@ -3,7 +3,7 @@
 # This script is taken and modified from https://github.com/wrs28/MUMPS3.jl/blob/5.3.3-update/test/basic_solve.jl
 
 # Import necessary packages
-using MUMPS3, MPI, LinearAlgebra, SparseArrays, Test
+using MESTI, MPI, LinearAlgebra, SparseArrays, Test
 
 # Check if MPI is initialized, and initialize if not
 MPI.Initialized() ? nothing : MPI.Init()

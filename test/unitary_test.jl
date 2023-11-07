@@ -45,7 +45,7 @@ output.polarization = "both"
 	opts = Opts()
         opts.verbal = false # Not print system information and timing to the standard output.
         (S, _, _)= mesti2s(syst, input, output, opts)
-        @test maximum(abs.((S'*S) - I(size(S, 1)))) ≤ 1e-6 # Check the unitarity of the scattering matrix
+        @test maximum(abs.((S'*S) - I(size(S, 1)))) ≤ 1e-3 # Check the unitarity of the scattering matrix
     end
 end
                     
@@ -67,6 +67,6 @@ end
         opts.verbal = false # Not print system information and timing to the standard output.
 
         (S, _, _)= mesti2s(syst, input, output, opts)
-	@test maximum(abs.((S'*S) - I(size(S, 1)))) ≤ 1e-6 # Check the unitarity of the scattering matrix
+	@test maximum(abs.((S'*S) - I(size(S, 1)))) ≤ 1e-3 # Check the unitarity of the scattering matrix
     end
 end

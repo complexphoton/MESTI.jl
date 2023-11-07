@@ -97,7 +97,7 @@ end
         
         (S, info) = MESTI_MATRIX_SOLVER!(matrices), when matrices.A != nothing, matrices.B != nothing, 
         and matrices.C != nothing, returns S = matrices.C*inv(matrices.A)*matrices.B 
-        where matrix matrices.C is either sparse or dense. When the MUMPS3 is available, this is done by 
+        where matrix matrices.C is either sparse or dense. When the MUMPS is available, this is done by 
         computing the Schur complement of an augmented matrix K = [matrices.A,matrices.B;matrices.C,0] 
         through a partial factorization.
         
@@ -136,8 +136,9 @@ end
             opts.solver (character vector; optional):
                 The solver used for sparse matrix factorization. Available choices are
                 (case-insensitive):
-                    "MUMPS"  - (default when MUMPS is available) Use MUMPS. Its JULIA 
-                            interface MUMPS3.jl must be installed.
+                    "MUMPS"  - (default when MUMPS is available) To use MUMPS, MUMPS must
+		            be installed and the Julia environment variable "MUMPS_PREFIX"
+			    should be specified.
                     "JULIA" -  (default when MUMPS is not available) Uses the built-in 
                             lu() function in JULIA, which uses UMFPACK. 
                 MUMPS is faster and uses less memory than lu(), and is required for
@@ -314,7 +315,7 @@ function mesti_matrix_solver!(matrices::Matrices, opts::Union{Opts,Nothing}=noth
     end
     
     # Use MUMPS for opts.solver when it is available
-    MUMPS_available = @isdefined(Mumps)
+    MUMPS_available = haskey(ENV,"MUMPS_PREFIX")
     if ~isdefined(opts, :solver) || isa(opts.solver, Nothing)
         if MUMPS_available
             opts.solver = "MUMPS"
@@ -326,7 +327,7 @@ function mesti_matrix_solver!(matrices::Matrices, opts::Union{Opts,Nothing}=noth
         if ~(opts.solver == "MUMPS") && ~(opts.solver == "JULIA") 
             throw(ArgumentError("opts.solver = \"$(opts.solver)\" is not a supported option; use \"MUMPS\" or \"JULIA\"."))
         elseif opts.solver == "MUMPS" && ~MUMPS_available
-            throw(ArgumentError("opts.solver = \"$(opts.solver)\" but package MUMPS3.jl is not found."))
+            throw(ArgumentError("opts.solver = \"$(opts.solver)\" but the Julia environment variable \"MUMPS_PREFIX\" is not specified."))
         end
     end
     

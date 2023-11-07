@@ -2,7 +2,7 @@
 
 julia_version = "1.9.3"
 manifest_format = "2.0"
-project_hash = "79ee0c059d6f4629cf0f0ef63788d21c3af61f15"
+project_hash = "86ee41aa2101e93f3ab9cea88d6fa38680835f68"
 
 [[deps.Adapt]]
 deps = ["LinearAlgebra", "Requires"]
@@ -159,14 +159,6 @@ deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "LazyArtifac
 git-tree-sha1 = "6979eccb6a9edbbb62681e158443e79ecc0d056a"
 uuid = "f1f71cc9-e9ae-5b93-9b94-4fe0e1ad3748"
 version = "5.3.1+0"
-
-[[deps.MUMPS3]]
-deps = ["Libdl", "LinearAlgebra", "MPI", "SparseArrays"]
-git-tree-sha1 = "45a0342aaf071af44c44a9d1bed482ee1d123313"
-repo-rev = "master"
-repo-url = "https://github.com/hochunlin/MUMPS3.jl"
-uuid = "8158958c-316f-11e9-3ff7-338d4f1f622e"
-version = "2.0.0"
 
 [[deps.MacroTools]]
 deps = ["Markdown", "Random"]

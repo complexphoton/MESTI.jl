@@ -59,13 +59,12 @@ For eigenmode computation, such as waveguide mode solver and photonic band struc
 
 ## Installation
 
-To use the APF method, before installing MESTI.jl, the user needs to install the parallel version of [MUMPS](https://mumps-solver.org/index.php) and its Julia interface [MUMPS3](https://github.com/wrs28/MUMPS3.jl/tree/5.3.3-update). Without MUMPS, MESTI.jl will still run but will only use other methods, which generally take longer and use more memory. So, MUMPS installation is strongly recommended for large-scale multi-input simulations or whenever efficiency is important. See this [MUMPS installation](./mumps) page for steps to install MUMPS.
+To use the APF method, before installing MESTI.jl, the user needs to install the parallel version of [MUMPS](https://mumps-solver.org/index.php). Without MUMPS, MESTI.jl will still run but will only use other methods, which generally take longer and use more memory. So, MUMPS installation is strongly recommended for large-scale multi-input simulations or whenever efficiency is important. See this [MUMPS installation](./mumps) page for steps to install MUMPS.
 
 To install MESTI.jl, open Julia REPL and type:  
 
 ```julia
-using Pkg; Pkg.add(PackageSpec(url="http://github.com/wrs28/MUMPS3.jl", rev="5.3.3-update"))
-Pkg.add(url="https://github.com/complexphoton/MESTI.jl")
+import Pkg; Pkg.add("MESTI")
 ```
 
 After installing MESTI.jl, you may also install other necessary packages which you will utilize in the examples by running <code>[install_packages.jl](./mumps/install_packages.jl)</code>
@@ -91,6 +90,9 @@ Detailed documentation is given in comments at the beginning of the function fil
 
 For example, typing <code>? mesti2s</code> in Julia brings up the documentation for <code>mesti2s()</code>.
 
+## Acknowledgment
+
+We thank [William Sweeney](https://github.com/wrs28) for granting us permission to integrate his MUMPS-julia interface, [MUMPS3.jl](https://github.com/wrs28/MUMPS3.jl/tree/5.3.3-update), into thia package. The files bearing the mumps3 prefix in the [src](./src) directory have been adopted from the MUMPS3.jl.
 
 ## Reference & Credit
 
