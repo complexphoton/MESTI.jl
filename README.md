@@ -23,7 +23,7 @@ Note that the coordinate notation switches between MESTI.m and MESTI.jl: (x, y, 
 MESTI.jl is a general-purpose solver with its interface written to provide maximal flexibility. It supports
  - Full 3D system supporting both *s* and *p* polarizations.
  - TM polarization for 2D system.
- - Any relative permittivity profile $\bar{\bar{\varepsilon}}(\bf r)$ (or *ε*<sub>*xx*</sub>(*y*,*z*)), real-valued or complex-valued. Users can optionally average the interface pixels for [subpixel smoothing](https://meep.readthedocs.io/en/latest/Subpixel_Smoothing) before calling MESTI.jl. It can be done by another code SBPSM.jl, which would be released soon.
+ - Any relative permittivity profile $\bar{\bar{\varepsilon}}(\bf r)$ (or *ε*<sub>*xx*</sub>(*y*,*z*)), real-valued or complex-valued. Users can optionally also average the interface pixels for [subpixel smoothing](https://meep.readthedocs.io/en/latest/Subpixel_Smoothing) through mesti_subpixel_smoothing().
  - Infinite open spaces can be described with a [perfectly matched layer (PML)](https://en.wikipedia.org/wiki/Perfectly_matched_layer) placed on any side(s), which also allows for infinite substrates, waveguides, photonic crystals, *etc*. The PML implemented in MESTI includes both imaginary-coordinate and real-coordinate stretching, so it can accelerate the attenuation of evanescent waves in addition to attenuating the propagating waves.
  - Any material dispersion $\bar{\bar{\varepsilon}}$(*ω*) can be used since this is in frequency domain.
  - Any list of input source profiles (user-specified or automatically built).
@@ -81,14 +81,35 @@ The solution method, the linear solver to use, and other options can be specifie
 
 The function [<code>mesti_build_channels()</code>](./src/mesti_build_channels.jl) can be used to build the input and/or output matrices when using <code>mesti()</code>, or to determine which channels are of interest when using <code>mesti2s()</code>.
 
+The function [<code>mesti_subpixel_smoothing()</code>](./src/mesti_subpixel_smoothing.jl) can be used to build the permittivity profile with subpixel smoothing.
+
 ## Documentation
 
 Detailed documentation is given in comments at the beginning of the function files:
  - [<code>mesti_main.jl</code>](./src/mesti_main.jl) for <code>mesti()</code> 
  - [<code>mesti2s.jl</code>](./src/mesti2s.jl) for <code>mesti2s()</code> 
  - [<code>mesti_build_channels.jl</code>](./src/mesti_build_channels.jl) for <code>mesti_build_channels()</code> 
+ - [<code>mesti_subpixel_smoothing</code>](./src/mesti_subpixel_smoothing.jl) for <code>mesti_subpixel_smoothing()</code> 
 
 For example, typing <code>? mesti2s</code> in Julia brings up the documentation for <code>mesti2s()</code>.
+
+## Examples
+
+Examples in the [examples](./examples) folder illustrate the usage and the main functionalities of MESTI. Each example has its own folder, with its <code>.jl</code> and <code>.ipynb</code> script, auxiliary files specific to that example, and a <code>README.md</code> page that shows the example script with its outputs:
+
+- [Open channel in a disordered system](./examples/2d_open_channel_through_disorder): 2D, using <code>mesti2s()</code>, transmission matrix & field profile with customized wavefronts.
+- [Phase-conjugated focusing in disordered system](./examples/2d_focusing_phase_conjugated_light_through_disorder): 2D, using <code>mesti()</code> and <code>mesti2s()</code>, customized source & field profile with customized wavefronts.
+- [Reflection matrix in Gaussian-beam basis](./examples/2d_reflection_matrix_Gaussian_beams): 2D, using <code>mesti()</code>, reflection matrix in customized basis for a fully open system.
+
+## Gallery
+
+Here are some animations from the examples above:
+
+1. Open channel propagating through disorder
+   <img src="./examples/2d_open_channel_through_disorder/disorder_open_channel.gif" width="540" height="360"> 
+2. Focusing phase-conjugated light through disorder<img src="./examples/2d_focusing_phase_conjugated_light_through_disorder/phase_conjugated_focusing.gif" width="540" height="360"> 
+3. Reflection matrix of a scatterer in Gaussian-beam basis:
+   <img src="./examples/2d_reflection_matrix_Gaussian_beams/reflection_matrix_Gaussian_beams.gif" width="540" height="360">  
 
 ## Acknowledgment
 

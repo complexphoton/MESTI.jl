@@ -2538,10 +2538,13 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
                     Ex_low = zeros(ComplexF64, ny_Ex, nz_low_extra, size(Ex,3))
                     # The l below is l = l - l_low, where l_low is the location of the inputs/outputs on the low surface.
                     l = (-nz_low_extra):1:-1
+                    # For the back propagation, incident wavefront would just use propagating channels and output wavefront would use all channels
                     kz_z = reshape(channels.low.kzdx_all, ny_Ex, 1).*reshape(l, 1, :) # kz*z; ny_Ex-by-nz_low_extra matrix through implicit expansion
-                    exp_pikz = exp.( 1im*kz_z) # exp(+i*kz*z)
                     exp_mikz = exp.(-1im*kz_z) # exp(-i*kz*z)
+                    kz_z_prop = reshape(channels.low.kzdx_prop, channels.low.N_prop, 1).*reshape(l, 1, :) # kz*z; channels.low.N_prop-by-nz_low_extra matrix through implicit expansion
+                    exp_pikz_prop = exp.( 1im*kz_z_prop); # exp(+i*kz*z)
                     c_in = zeros(ComplexF64, ny_Ex, 1)
+                    c_in_prop = zeros(ComplexF64, channels.low.N_prop, 1)
                     l_low = 1 # index for the inputs/outputs on the low surface
                     if M_in_low > 0
                         prefactor = reshape(exp.((-1im*dn)*channels.low.kzdx_prop)./channels.low.sqrt_nu_prop, N_prop_low, 1)
@@ -2551,12 +2554,13 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
                         # c_in is the incident wavefront at n_low; note we need to back propagate dn pixel from z=0
                         c_in[:] .= 0
                         if use_ind_in
-                            c_in[channels.low.ind_prop[ind_in_low[ii]]] = prefactor[ind_in_low[ii]]
+                            c_in_prop[ind_in_low[ii]] = prefactor[ind_in_low[ii]]
                         else
-                            c_in[channels.low.ind_prop] = prefactor.*v_in_low[:,ii]                                
+                            c_in_prop = prefactor.*v_in_low[:,ii]                                
                         end
+                        c_in[channels.low.ind_prop] = c_in_prop
                         c_out = c - c_in
-                        Ex_low[:,:,ii] = u*(c_in.*exp_pikz + c_out.*exp_mikz)                           
+                        Ex_low[:,:,ii] = u[:,channels.low.ind_prop]*(c_in_prop.*exp_pikz_prop) + u*(c_out.*exp_mikz)               
                     end
                     if two_sided
                         for ii = 1:M_in_high # input from high
@@ -2666,32 +2670,33 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
                         Ex_high = zeros(ComplexF64, ny_Ex, nz_high_extra, size(Ex,3))
                         # The n below is l = l - l_high, where l_high is the location of the inputs/outputs on the high surface.
                         l = 1:nz_high_extra
+                        # For the back propagation, incident wavefront would just use propagating channels and output wavefront would use all channels                
                         kz_z = reshape(channels.high.kzdx_all, ny_Ex, 1).*reshape(l, 1, :) # kz*z; ny_Ex-by-nz_low_extra matrix through implicit expansion
                         exp_pikz = exp.( 1im*kz_z) # exp(+i*kz*z)
-                        exp_mikz = exp.(-1im*kz_z) # exp(-i*kz*z)
+                        kz_z_prop = reshape(channels.high.kzdx_prop, channels.high.N_prop, 1).*reshape(l, 1, :) # kz*z; channels.high.N_prop-by-nz_high_extra matrix through implicit expansion
+                        exp_mikz_prop = exp.(-1im*kz_z_prop) # exp(-i*kz*z)
                         c_in = zeros(ComplexF64, ny_Ex, 1)
+                        c_in_prop = zeros(ComplexF64, channels.high.N_prop, 1)
                         l_high = size(Ex, 2) # index for the inputs/outputs on the high surface
-                        
                         for ii = 1:M_in_low # input from low
                             c_out = u_prime*Ex[:, l_high, ii] # c_out = c because there is no input on the high side
                             Ex_high[:,:,ii] = u*(c_out.*exp_pikz)
-                        end
-                                                
+                        end                
                         if M_in_high > 0
                                 prefactor = reshape(exp.((-1im*dn)*channels.high.kzdx_prop)./channels.high.sqrt_nu_prop, N_prop_high, 1)       
-                        end
-                                                
+                        end                     
                         for ii = 1:M_in_high # input from high
                             c = u_prime*Ex[:, l_high, M_in_low+ii] # c is a ny_Ex-by-1 column vector of transverse mode coefficients
                             # c_in is the incident wavefront at n_R; note we need to back propagate dn pixel from z=d
                             c_in[:] .= 0
                             if use_ind_in
-                                c_in[channels.high.ind_prop[ind_in_high[ii]]] = prefactor[ind_in_high[ii]]
+                                c_in_prop[ind_in_high[ii]] = prefactor[ind_in_high[ii]]
                             else
-                                c_in[channels.high.ind_prop] = prefactor.*v_in_high[:,ii]
+                                c_in_prop = prefactor.*v_in_high[:,ii]
                             end
+                            c_in[channels.high.ind_prop] = c_in_prop
                             c_out = c - c_in
-                            Ex_high[:,:,M_in_low+ii] = u*(c_in.*exp_mikz + c_out.*exp_pikz)
+                            Ex_high[:,:,M_in_low+ii] = u[:,channels.high.ind_prop]*(c_in_prop.*exp_mikz_prop) + u*(c_out.*exp_pikz)
                         end
                         Ex = cat(Ex, Ex_high, dims=2)
                     end

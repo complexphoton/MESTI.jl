@@ -1,7 +1,9 @@
 module MESTI
 
+using GeometryPrimitives
 using LinearAlgebra
 using SparseArrays
+using StaticArrays
 using Statistics
 using TensorCast
 using LazyGrids
@@ -18,6 +20,7 @@ include("mumps3_printing.jl")
 
 include("get_optimal_PML.jl")
 include("build_transverse_function_1d.jl")
+include("mesti_subpixel_smoothing.jl")
 include("mesti_build_fdfd_matrix.jl")
 include("mesti_matrix_solver.jl")
 include("setup_longitudinal.jl")

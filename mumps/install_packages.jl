@@ -1,14 +1,11 @@
 using Pkg
 
-Pkg.add("LazyGrids")
-Pkg.add("MPI")
+Pkg.add("Arpack")
+Pkg.add("GeometryPrimitives")
 Pkg.add("LinearAlgebra")
-Pkg.add("SparseArrays")
-Pkg.add("Statistics")
-Pkg.add("TensorCast")
+Pkg.add("Plots")
 Pkg.add("Printf")
 Pkg.add("Random")
-
-Pkg.add("PyPlot")
-Pkg.add("Arpack")
-Pkg.add("Interpolations")
+Pkg.add("SparseArrays")
+Pkg.add("Statistics")
+Pkg.add("Test")
