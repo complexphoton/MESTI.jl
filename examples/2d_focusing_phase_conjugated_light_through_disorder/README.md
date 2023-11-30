@@ -113,7 +113,7 @@ wf_reg_focus = exp.(-1im*channels_ave_epsilon.kydx_prop*(m0_focus)) .* exp.(-1im
 
 # build projection matrix C on the low side
 C_low = channels_low.sqrt_nu_prop.*exp.((-1im*dn)*channels_low.kzdx_prop).*convert(Matrix, adjoint(channels_low.u_x_m(channels_low.kydx_prop)))
-proj_coefficient = conj(C_low*Ex_field[:,pml_npixels+1])
+proj_coefficient = C_low*Ex_field[:,pml_npixels+1]
 
 # specify two input incident wavefronts:
 # (1) regular focusing wavefront
