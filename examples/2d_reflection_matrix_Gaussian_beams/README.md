@@ -51,7 +51,7 @@ heatmap(z, y, epsilon_xx,
 
 We consider inputs being Gaussian beams focused at (*y*<sub>f</sub>, *z*<sub>f</sub>). In this example, we fix the focal depth at  *z*<sub>f</sub> = *z*<sub>0</sub> (i.e., the depth of the scatterer), and scan the transverse coordinate *y*<sub>f</sub> of the focus.
 
-Perfect Gaussian beams can be generated with the total-field/scattered-field (TF/SF) method. But since the cross section of the beam decays exponentially in *y*, we can generate Gaussian beams to a high accuracy simply by placing line sources at a cross section on the left, which is what we do here. We place the line sources at *z* = *z*<sub>source</sub>, just in front of the PML.
+Perfect Gaussian beams can be generated with the total-field/scattered-field (TF/SF) method. But since the cross section of the beam decays exponentially in *y*, we can generate Gaussian beams to a high accuracy simply by placing line sources at a cross section on the low side, which is what we do here. We place the line sources at *z* = *z*<sub>source</sub>, just in front of the PML.
 
 To determine the required line sources, we (1) take the field profile of the desired incident Gaussian beam at the focal plane, *E*<sup>in</sup>(*y*,*z*<sub>f</sub>) = *E*<sub>0</sub>exp(-(*y* - *y*<sub>f</sub>)<sup>2</sup>/*w*<sup>2</sup>), (2) project it onto the propagating channels (i.e., ignoring evanescent contributions) of free space, (3) back propagate it to the source plane to determine *E*<sup>in</sup>(*y*,*z*<sub>source</sub>) in the propagating-channel basis, and (4) determine the line source necessary to generate such *E*<sup>in</sup>(*y*,*z*<sub>source</sub>).
 

@@ -4,14 +4,15 @@
 # None of these functions change the JOB parameter.
 
 export invoke_mumps!,
+set_keep!, set_cntl!,
 set_icntl!, set_job!,
 provide_matrix!,
 provide_rhs!,
 get_rhs!, get_rhs,
 get_sol!, get_sol,
 set_schur_centralized_by_column!,
-get_schur_complement!, get_schur_complement
-
+get_schur_complement!, get_schur_complement,
+finalize!
 
 """
     invoke_mumps_unsafe!(mumps)
@@ -81,31 +82,46 @@ end
 
 
 """
-    set_icntl!(mumps,i,val; [displaylevel=1])
+    set_keep!(mumps,i,val; [displaylevel=0])
 
-Set the integer control parameters according to ICNTL[i]=val
+Set the keep parameters according to KEEP[i]=val
 
-See also: [`display_icntl`](@ref)
+See also: [`display_keep`](@ref)
 """
-function set_icntl!(mumps::Mumps,i::Int,val::Int; displaylevel=mumps.icntl[4]-1)
-    icntl = mumps.icntl
-    mumps.icntl = (icntl[1:i-1]...,convert(MUMPS_INT,val),icntl[i+1:end]...)
-    displaylevel>0 ? display_icntl(stdout,mumps.icntl,i,val) : nothing
+function set_keep!(mumps::Mumps,i::Int,val::Int; displaylevel=0)
+    keep = mumps.keep
+    mumps.keep = (keep[1:i-1]...,convert(MUMPS_INT,val),keep[i+1:end]...)
+    #displaylevel>0 ? display_keep(stdout,mumps.keep,i,val) : nothing
     return nothing
 end
 
 
 """
-    set_cntl!(mumps,i,val; [displaylevel=1])
+    set_icntl!(mumps,i,val; [displaylevel=0])
+
+Set the integer control parameters according to ICNTL[i]=val
+
+See also: [`display_icntl`](@ref)
+"""
+function set_icntl!(mumps::Mumps,i::Int,val::Int; displaylevel=0)
+    icntl = mumps.icntl
+    mumps.icntl = (icntl[1:i-1]...,convert(MUMPS_INT,val),icntl[i+1:end]...)
+    #displaylevel>0 ? display_icntl(stdout,mumps.icntl,i,val) : nothing
+    return nothing
+end
+
+
+"""
+    set_cntl!(mumps,i,val; [displaylevel=0])
 
 Set the real/complex control parameters according to CNTL[i]=val
 
 See also: [`display_cntl`](@ref)
 """
-function set_cntl!(mumps::Mumps{TC,TR},i::Int,val::Float64; displaylevel=mumps.icntl[4]-1) where {TC,TR}
+function set_cntl!(mumps::Mumps{TC,TR},i::Int,val::Float64; displaylevel=0) where {TC,TR}
     cntl = mumps.cntl
     mumps.cntl = (cntl[1:i-1]...,convert(TR,val),cntl[i+1:end]...)
-    displaylevel>0 ? display_cntl(stdout,mumps.cntl,i,val) : nothing
+    #displaylevel>0 ? display_cntl(stdout,mumps.cntl,i,val) : nothing
     return nothing
 end
 

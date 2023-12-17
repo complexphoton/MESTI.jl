@@ -210,7 +210,7 @@ end
             opts.nthreads_OMP (positive integer scalar; optional):
                 Number of OpenMP threads used in MUMPS; overwrites the OMP_NUM_THREADS
                 environment variable.
-            opts.parallel_dependency_graph (logical scalar; optional):
+            opts.parallel_dependency_graph (logical scalar; optional, defaults to false):
                 If MUMPS is multithread, whether to use parallel dependency graph in MUMPS.
                 This typically improve the time performance, but marginally increase 
                 the memory usage.
@@ -650,7 +650,7 @@ function mesti_matrix_solver!(matrices::Matrices, opts::Union{Opts,Nothing}=noth
             is_symmetric_K = false # even if A is symmetric, generally C won't equal transpose(B); we will not check whether C equals B.' or not; the user should set C = "transpose(B)" if C=B.'
         end        
         if opts.clear_memory
-            matrices.A = nothing; matrices.B = nothing; matrices.C = nothing; D = nothing;
+            matrices.A = nothing; matrices.B = nothing; matrices.C = nothing; D = nothing
             GC.gc()
         end
         ind_schur = N .+ (1:M_tot) # indices for the Schur variables; must be a row vector
@@ -743,7 +743,7 @@ function mesti_matrix_solver!(matrices::Matrices, opts::Union{Opts,Nothing}=noth
                 S = Matrix(C_inv_U/L)*(P*(R\matrices.B))   # [[C*inv(U)]*inv(L)]*B
             end
         end
-        t2 = time(); info.timing_solve = t2-t1;
+        t2 = time(); info.timing_solve = t2-t1
         if opts.verbal; @printf("elapsed time: %7.3f secs\n", info.timing_solve); end
     elseif opts.method == "factorize_and_solve"
     ## Compute S=C*inv(A)*B or X=inv(A)*B by factorizing A and solving for X column by column
@@ -959,7 +959,6 @@ function MUMPS_analyze_and_factorize(A::Union{SparseMatrixCSC{Int64, Int64},Spar
     MPI.Initialized() ? nothing : MPI.Init()
     id = Mumps(A, sym=sym, par=par) # get the default parameters    
 
-    set_icntl!(id,4,0;displaylevel=0); # Turn off diagnostic messages 
     if opts.verbal_solver
         # Output to standard output stream, which is labeled by 6 in fortran
         # Note that the output behavior depends on the compiler used to compile MUMPS:

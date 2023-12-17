@@ -1,7 +1,7 @@
-# Export a function get_optimal_PML()
-export get_optimal_PML
+# Export a function mesti_optimal_pml_params()
+export mesti_optimal_pml_params
 
-function get_optimal_PML(wavelength_over_dx)
+function mesti_optimal_pml_params(wavelength_over_dx)
     # Return an optimal PML parameters from double-log FOM given the mesh resolution wavelength_over_dx
     # wavelength_over_dx should be in the range of [5, 500].
 

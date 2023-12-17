@@ -19,7 +19,7 @@ nx_Ey = nx; ny_Ey = ny; nz_Ey = nz -1
 nx_Ez = nx; ny_Ez = ny; nz_Ez = nz
 
 # Use optimized PML parameters for this resolution to reduce error
-zpml = get_optimal_PML(syst.wavelength/syst.dx)
+zpml = mesti_optimal_pml_params(syst.wavelength/syst.dx)
 zpml.npixels = 25
 syst.zPML = [zpml]
 

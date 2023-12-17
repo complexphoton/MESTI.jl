@@ -529,7 +529,7 @@ end
             opts.nthreads_OMP (positive integer scalar; optional):
                 Number of OpenMP threads used in MUMPS; overwrites the OMP_NUM_THREADS
                 environment variable.
-            opts.parallel_dependency_graph (logical scalar; optional):
+            opts.parallel_dependency_graph (logical scalar; optional, defaults to false):
                 If MUMPS is multithread, whether to use parallel dependency graph in MUMPS.
                 This typically improve the time performance, but marginally increase 
                 the memory usage.
@@ -610,7 +610,7 @@ end
             numbers given by vectors channels.low.kzdx_prop and channels.high.kzdx_prop.
                 The phases of the elements of the scattering matrix depend on the
             reference plane. For channels on the low, the reference plane is at
-            z = 0. For channels on the high, the reference plane is at z = H.
+            z = 0. For channels on the high, the reference plane is at z = L.
                 When a subset of the propagating channels are requested, in 3D
             ''input = channel_index()'' and ''output = channel_index()''
             with in.ind_low_s, in.ind_low_p, in.ind_high_s, in.ind_high_p, 
@@ -716,7 +716,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
         (ny_Ex, nz_Ex) = size(syst.epsilon_xx)
     end
     
-    dn = 0.5;  # the source/detection is half a pixel away from z=0 and z=d
+    dn = 0.5 # the source/detection is half a pixel away from z = 0 and z = L
     
     if ~use_2D_TM
         # Check boundary condition in x
@@ -918,7 +918,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
             throw(ArgumentError("opts.nz_low must be a non-negative integer scalar, if given."))
         end
         if ~isdefined(opts, :nz_high) || isa(opts.nz_high, Nothing)
-            opts.nz_high = 0;
+            opts.nz_high = 0
         elseif ~(opts.nz_high >= 0 )
             throw(ArgumentError("opts.nz_high must be a non-negative integer scalar, if given."))
         end
@@ -973,9 +973,9 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
         end
     end
 
-    method_specified = true;
+    method_specified = true
     if ~isdefined(opts, :method) || isa(opts.method, Nothing)
-        method_specified = false;        
+        method_specified = false        
         # By default, if the argument ''output'' is not given or if
         # opts.iterative_refinement = true, then "factorize_and_solve" is used.
         # Otherwise, then "APF" is used when opts.solver = "MUMPS", and
@@ -1101,7 +1101,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
         @printf("\n")
     end
         
-    t1 = time(); timing_init = t1-t0; # Initialization time
+    t1 = time(); timing_init = t1-t0 # Initialization time
         
     ## Part 2.1: Parse the argument ''input''
     if opts.verbal; @printf("Building B,C... "); end
@@ -1404,7 +1404,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
                 if isdefined(output, :polarization) && ~(output.polarization in ["s", "p", "both"])
                     throw(ArgumentError("output.polarization, if given, must be \"s\", \"p\", or \"both\"."))
                 elseif ~isdefined(output, :polarization)
-                    # Pick the polarization to use when uers specify the side;
+                    # Pick the polarization to use when uers specify the side
                     output.polarization = "both"
                 end
             end
@@ -1642,12 +1642,12 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
     
     # No need to build C if we symmetrize K
     if opts.return_field_profile || use_transpose_B
-        build_C = false;
+        build_C = false
     else
-        build_C = true;
+        build_C = true
     end    
     
-    # We only need the transverse functions for Ex, Ey, and derivative of the transverse functions for Ez; see Ref XXX ......
+    # We only need the transverse functions for Ex, Ey, and derivative of the transverse functions for Ez; see Ref which would be published later.
     if ~use_2D_TM
         @cast u_prop_low_Ex[(n,m),N_prop_low] := channels.u_x_m(channels.low.kydx_prop)[m,N_prop_low] * channels.u_x_n(channels.low.kxdx_prop)[n,N_prop_low]
         @cast u_prop_low_Ey[(n,m),N_prop_low] := channels.u_y_m(channels.low.kydx_prop)[m,N_prop_low] * channels.u_y_n(channels.low.kxdx_prop)[n,N_prop_low]
@@ -1667,12 +1667,12 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
             end
         end
     else
-        @cast u_prop_low_Ex[m,N_prop_low] := channels.u_x_m(channels.low.kydx_prop)[m,N_prop_low]
+        u_prop_low_Ex = channels.u_x_m(channels.low.kydx_prop)
         if two_sided
             if (syst.epsilon_high == syst.epsilon_low)
                 u_prop_high_Ex = u_prop_low_Ex
             else
-                @cast u_prop_high_Ex[m,N_prop_high] := channels.u_x_m(channels.high.kydx_prop)[m,N_prop_high]
+                u_prop_high_Ex = channels.u_x_m(channels.high.kydx_prop)
             end
         end
     end
@@ -1682,7 +1682,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
     # B_Ej_low, C_Ej_low, B_Ej_high, C_Ej_high are all dense matrices with size(..., 1) = nx_Ej*ny_Ej. They are inputs/outputs on a slice surface in xy-plane.
     # Inputs/outputs are placed at one pixel outside syst.epsilon_xx/epsilon_yy/epsilon_zz.
     # A line source including back propagation of B_Ex_low = -2im*sqrt(nu)*alpha_x(a,b,sigma,+)*u_x(n,m,a,b)*exp(1im*kz(a,b)*dx*(-1/2))+2/sqrt(nu)*alpha_z(a,b,sigma,+)*(u_z(n+1,m,a,b)-u_z(n,m,a,b))*cos(kz(a,b)*dx/2)*exp(1im*kz(a,b)*dx*(-1/2)) and B_Ey_low = -2im*sqrt(nu)*alpha_y(a,b,sigma,+)*u_y(n,m,a,b)*exp(1im*kz(a,b)*dx*(-1/2))+2/sqrt(nu)*alpha_z(a,b,sigma,+)*(u_z(n,m+1,a,b)-u_z(n,m,a,b))*cos(kz(a,b)*dx/2)*exp(1im*kz(a,b)*dx*(-1/2)) at l=0 will generate an z-flux-normalized incident field of Ex, Ey, and Ez. Ex = alpha_x(a,b,sigma,+/-)/sqrt(nu)*alpha_x(a,b,sigma,+/-)*u_x(n,m,a,b)*exp(1im*kz(a,b)*dx*(|l|-1/2)), where + for l>= 0 and - for l< 0. Ey = alpha_y(a,b,sigma,+/-)/sqrt(nu)*alpha_y(a,b,sigma,+/-)*u_x(n,m,a,b)*exp(1im*kz(a,b)*dx*(|l|-1/2)), where + for l>= 0 and - for l< 0. Ez = alpha_y(a,b,sigma,+/-)/sqrt(nu)*alpha_y(a,b,sigma,+/-)*u_x(n,m,a,b)*exp(1im*kz(a,b)*dx*|l|), where + for l>= 0 and - for l< 0. Note nu = sin(kzdx).
-    # We will multiple the -2i prefactor at the end.
+    # We will multiply the -2i prefactor at the end.
     # The flux-normalized output projection is \sum\limits_{j = x,y}{sqrt(nu)*conj(alpha_j(c,d,sigma,+/-)*u_x(n,m,c,d)*exp((+/-)1im*kz(c,d)*dx*(1/2)))+1/sqrt(nu)*conj(1im*alpha_z(c,d,sigma,+/-)*(u_z(n+delta_ix,m+delta_iy,c,d)-u_z(n,m,c,d))*cos(kz(c,d)*dx/2)))*exp(1im*kz(c,d)*dx*(-1/2)}; it will be transposed in mesti(). We also need to shift the phase by back propagating.
     # Therefore, we want C_Ex_low = sqrt(nu)*conj(alpha_x(c,d,sigma,-)*u_x(n,m,c,d)*exp(-1im*kz(c,d)*dx*(1/2)))+1/sqrt(nu)*conj(1im*alpha_z(c,d,sigma,-)*(u_z(n+1,m,c,d)-u_z(n,m,c,d))*cos(kz(c,d)*dx/2)))*exp(1im*kz(c,d)*dx*(-1/2) and C_Ey_low = sqrt(nu)*conj(alpha_y(c,d,sigma,-)*u_x(n,m,c,d)*exp(-1im*kz(c,d)*dx*(1/2)))+1/sqrt(nu)*conj(1im*alpha_z(c,d,sigma,-)*(u_z(n+1,m,c,d)-u_z(n,m,c,d))*cos(kz(c,d)*dx/2)))*exp(1im*kz(c,d)*dx*(-1/2).
     # Note that the complex conjugation only applies to u; the sqrt(nu) prefactor is not conjugated. (At real-valued frequency, nu is real-valued, so this doesn't matter. But at complex-valued frequency, nu is complex-valued, and we should not conjugate it. Note that the transverse basis is complete and orthonormal even when the frequency is complex, so the output projection doesn't need to be modified when the frequency is complex.)
@@ -1917,7 +1917,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
             C_high_s_Ex = nothing; C_high_s_Ey = nothing; C_high_p_Ex = nothing; C_high_p_Ey = nothing
             C_high_p_dEz_over_dx = nothing; C_high_p_dEz_over_dy = nothing
         else
-            u_prop_low_Ex = nothing; u_prop_high_Ex = nothing;
+            u_prop_low_Ex = nothing; u_prop_high_Ex = nothing
         end
         GC.gc()
     end
@@ -1997,7 +1997,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
         B_Ex = Source_struct()
         B_Ey = Source_struct()
         B_Ez = Source_struct()
-        B_Ez.isempty = true # The source only has x and y components; see Ref XXX ......
+        B_Ez.isempty = true # The source only has x and y components; see Ref which would be published later.
         if ~two_sided
             B_Ex.pos = [[1, 1, l_low, nx_Ex, ny_Ex, 1]]
             B_Ey.pos = [[1, 1, l_low, nx_Ey, ny_Ey, 1]]
@@ -2028,7 +2028,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
             C_Ex = Source_struct()
             C_Ey = Source_struct()
             C_Ez = Source_struct()
-            C_Ez.isempty = true # The output projection only has x and y components; see Ref XXX ......        
+            C_Ez.isempty = true # The output projection only has x and y components; see Ref which would be published later.        
             if ~two_sided
                 C_Ex.pos = [[1, 1, l_low, nx_Ex, ny_Ex, 1]]
                 C_Ey.pos = [[1, 1, l_low, nx_Ey, ny_Ey, 1]]
@@ -2234,11 +2234,11 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
                     prefactor = [prefactor; channels.high.sqrt_nu_prop[ind_out_high].*exp.((-1im*dn)*channels.high.kzdx_prop[ind_out_high])]
                 end
             end
-            S = prefactor.*S; # use implicit expansion
+            S = prefactor.*S # use implicit expansion
         end
                                 
         # Subtract D = C*inv(A_0)*B - S_0 where A_0 is a reference system and S_0 is its scattering matrix
-        # The form of D is summation phase shift by dn over x, y, and z components; see Ref XXX ......    
+        # The form of D is summation phase shift by dn over x, y, and z components; see Ref which would be published later.    
         # When user-specified input and output wavefronts are used, we have D_low = (v_out_low')*diag(D)*v_in_low 
         if ~use_2D_TM
             phase_factor = repeat(exp.((-1im*2*dn)*channels.low.kzdx_prop), 2)
@@ -2390,7 +2390,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
 
                 # u where the a-th column is the a-th channels; it includes all the propagating and evanescent channels.
                 # u_low = [[u_Ex.*reshape(alpha_x_all_low_s,1,:); u_Ey.*reshape(alpha_y_all_low_s,1,:)]
-                #          [u_Ex.*reshape(alpha_x_all_low_p,1,:)+1im*u_dEz_over_dx*reshape(cos.(channels.low.kzdx_all/2).*alpha_z_all_low_p./sin.(channels.low.kzdx_all),1,:); 
+                #          [u_Ex.*reshape(alpha_x_all_low_p,1,:)+1im*u_dEz_over_dx*reshape(cos.(channels.low.kzdx_all/2).*alpha_z_all_low_p./sin.(channels.low.kzdx_all),1,:)
                 #           u_Ey.*reshape(alpha_y_all_low_p,1,:)+1im*u_dEz_over_dy*reshape(cos.(channels.low.kzdx_all/2).*alpha_z_all_low_p./sin.(channels.low.kzdx_all),1,:)]]
                 # u_low = [[u_Ex.*reshape(alpha_x_all_low_s,1,:); u_Ey.*reshape(alpha_y_all_low_s,1,:); u_Ez.*reshape(alpha_z_all_low_s,1,:)]
                 #          [u_Ex.*reshape(alpha_x_all_low_p,1,:); u_Ey.*reshape(alpha_y_all_low_p,1,:); u_Ez.*reshape(alpha_z_all_low_p,1,:)]]
@@ -2542,7 +2542,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
                     kz_z = reshape(channels.low.kzdx_all, ny_Ex, 1).*reshape(l, 1, :) # kz*z; ny_Ex-by-nz_low_extra matrix through implicit expansion
                     exp_mikz = exp.(-1im*kz_z) # exp(-i*kz*z)
                     kz_z_prop = reshape(channels.low.kzdx_prop, channels.low.N_prop, 1).*reshape(l, 1, :) # kz*z; channels.low.N_prop-by-nz_low_extra matrix through implicit expansion
-                    exp_pikz_prop = exp.( 1im*kz_z_prop); # exp(+i*kz*z)
+                    exp_pikz_prop = exp.( 1im*kz_z_prop) # exp(+i*kz*z)
                     c_in = zeros(ComplexF64, ny_Ex, 1)
                     c_in_prop = zeros(ComplexF64, channels.low.N_prop, 1)
                     l_low = 1 # index for the inputs/outputs on the low surface
@@ -2687,7 +2687,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
                         end                     
                         for ii = 1:M_in_high # input from high
                             c = u_prime*Ex[:, l_high, M_in_low+ii] # c is a ny_Ex-by-1 column vector of transverse mode coefficients
-                            # c_in is the incident wavefront at n_R; note we need to back propagate dn pixel from z=d
+                            # c_in is the incident wavefront at n_R; note we need to back propagate dn pixel from z = L
                             c_in[:] .= 0
                             if use_ind_in
                                 c_in_prop[ind_in_high[ii]] = prefactor[ind_in_high[ii]]
