@@ -1,4 +1,4 @@
-export display_icntl
+export display_icntl, display_cntl, display_keep
 
 function Base.show(io::IO,mumps::Mumps{TC,TR}) where {TC,TR}
     print(io,"Mumps{$TC,$TR}: ")
@@ -83,6 +83,7 @@ function Base.show(io::IO,mumps::Mumps{TC,TR}) where {TC,TR}
         display_icntl(io,mumps.icntl,icntl_inds[i],mumps.icntl[icntl_inds[i]])
     end
 end
+
 
 """
     display_icntl(mumps)
@@ -415,7 +416,6 @@ function display_icntl(io::IO,icntl,i,val)
 end
 
 
-
 """
     display_cntl(mumps)
 
@@ -448,4 +448,25 @@ function display_cntl(io::IO,cntl,i,val)
     end
     print(io,"\n")
     return nothing
+end
+
+
+"""
+    display_keep(mumps)
+
+Show the KEEP array of `mumps`
+
+See also: [`set_keep!`](@ref)
+"""
+display_keep(io::IO,mumps::Mumps) = display_keep(io,mumps.mumps.keep)
+function display_keep(io::IO,keep)
+    for i ∈ eachindex(keep)
+        display_keep(io,keep,i,icntl[i])
+    end
+end
+function display_keep(io::IO,keep,i,val)
+    if i == 401
+        print(io,"keep(401): ")
+        print(io,"$val")
+    end
 end

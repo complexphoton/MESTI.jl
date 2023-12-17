@@ -571,7 +571,7 @@ end
             opts.nthreads_OMP (positive integer scalar; optional):
                 Number of OpenMP threads used in MUMPS; overwrites the OMP_NUM_THREADS
                 environment variable.
-            opts.parallel_dependency_graph (logical scalar; optional):
+            opts.parallel_dependency_graph (logical scalar; optional, defaults to false):
                 If MUMPS is multithread, whether to use parallel dependency graph in MUMPS.
                 This typically improve the time performance, but marginally increase 
                 the memory usage.
@@ -1092,7 +1092,7 @@ function mesti(syst::Syst, B::Union{SparseMatrixCSC{Int64,Int64},SparseMatrixCSC
     if opts.verbal
         # print basic system info if the calling function is not mesti2s()
         if stacktrace()[2].func == :mesti2s
-            called_from_mesti2s = true;
+            called_from_mesti2s = true
             @printf("            ... ")
         else            
             called_from_mesti2s = false
@@ -1249,7 +1249,7 @@ function mesti(syst::Syst, B::Union{SparseMatrixCSC{Int64,Int64},SparseMatrixCSC
                         n2 = n1 + pos[4] - 1 # last index in x
                         m2 = m1 + pos[5] - 1 # last index in y
                         l2 = l1 + pos[6] - 1 # last index in z
-                        nxyz_data = pos[4]*pos[5]*pos[6]; # number of elements in this cuboid
+                        nxyz_data = pos[4]*pos[5]*pos[6] # number of elements in this cuboid
                         if n1 > nx_list[ii]
                             if ii == 1; throw(ArgumentError("B[$ii].pos[$jj][1] = $(n1) exceeds nx_E$(component[ii]) = $(nx_Ex).")); end
                             if ii == 2; throw(ArgumentError("B[$ii].pos[$jj][1] = $(n1) exceeds nx_E$(component[ii]) = $(nx_Ey).")); end
@@ -1293,9 +1293,9 @@ function mesti(syst::Syst, B::Union{SparseMatrixCSC{Int64,Int64},SparseMatrixCSC
                         end
                         if use_iv_pairs
                             # convert to linear indices
-                            n_list = repeat((n1:n2), 1, pos(5), pos(6))
-                            m_list = repeat(transpose(m1:m2), pos(4), 1, pos(6))
-                            l_list = repeat(reshape((l1:l2),1,1,:), pos(4), pos(5), 1)
+                            n_list = reshape(repeat((n1:n2), 1, pos[5], pos[6]),:)
+                            m_list = reshape(repeat(transpose(m1:m2), pos[4], 1, pos[6]),:)
+                            l_list = reshape(repeat(reshape((l1:l2),1,1,:), pos[4], pos[5], 1),:)
                             #ind = LinearIndices((nx_list[ii], ny_list[ii], nz_list[ii]))[CartesianIndex.(n_list, m_list, l_list)]
                             ind = Base._sub2ind((nx_list[ii], ny_list[ii], nz_list[ii]), n_list, m_list, l_list)
                         end
@@ -1312,7 +1312,7 @@ function mesti(syst::Syst, B::Union{SparseMatrixCSC{Int64,Int64},SparseMatrixCSC
                     end
                     if use_iv_pairs
                         # Build index-value pairs: (ind_list, a_list, v_list)
-                        N_ii = nxyz_data*M_ii; # number of nonzero elements in the jj-th part of matrix B_ii
+                        N_ii = nxyz_data*M_ii # number of nonzero elements in the jj-th part of matrix B_ii
                         ind_temp = N .+ (1:N_ii)
                         ind_list[ind_temp] = repeat(ind, M_ii) # spatial index
                         a_list[ind_temp] = reshape(repeat(M.+(1:M_ii), nxyz_data), N_ii) # input index
@@ -1438,7 +1438,7 @@ function mesti(syst::Syst, B::Union{SparseMatrixCSC{Int64,Int64},SparseMatrixCSC
                 end
                 if use_iv_pairs
                     # Construct matrix C_ii from the complete set of index-value pairs
-                    N_tot = 0; # total number of nonzero elements in C_ii
+                    N_tot = 0 # total number of nonzero elements in C_ii
                     for jj = 1:length(C_struct.data)
                         N_tot = N_tot + length(C_struct.data[jj])
                     end
@@ -1467,7 +1467,7 @@ function mesti(syst::Syst, B::Union{SparseMatrixCSC{Int64,Int64},SparseMatrixCSC
                         n2 = n1 + pos[4] - 1 # last index in x
                         m2 = m1 + pos[5] - 1 # last index in y
                         l2 = l1 + pos[6] - 1 # last index in z
-                        nxyz_data = pos[4]*pos[5]*pos[6]; # number of elements in this cuboid
+                        nxyz_data = pos[4]*pos[5]*pos[6] # number of elements in this cuboid
                         if n1 > nx_list[ii]
                             if ii == 1; throw(ArgumentError("C[$ii].pos[$jj][1] = $(n1) exceeds nx_E$(component[ii]) = $(nx_Ex).")); end
                             if ii == 2; throw(ArgumentError("C[$ii].pos[$jj][1] = $(n1) exceeds nx_E$(component[ii]) = $(nx_Ey).")); end
@@ -1511,9 +1511,9 @@ function mesti(syst::Syst, B::Union{SparseMatrixCSC{Int64,Int64},SparseMatrixCSC
                         end
                         if use_iv_pairs
                             # convert to linear indices
-                            n_list = repeat((n1:n2), 1, pos[5], pos[6])
-                            m_list = repeat(transpose(m1:m2), pos[4], 1, pos[6])
-                            l_list = repeat(reshape((l1:l2),1,1,:), pos[4], pos[5], 1)
+                            n_list = reshape(repeat((n1:n2), 1, pos[5], pos[6]),:)
+                            m_list = reshape(repeat(transpose(m1:m2), pos[4], 1, pos[6]),:)
+                            l_list = reshape(repeat(reshape((l1:l2),1,1,:), pos[4], pos[5], 1),:)
                             #ind = LinearIndices((nx_list[ii], ny_list[ii], nz_list[ii]))[CartesianIndex.(n_list, m_list, l_list)]
                             ind = Base._sub2ind((nx_list[ii], ny_list[ii], nz_list[ii]), n_list, m_list, l_list)
                         end
@@ -1530,7 +1530,7 @@ function mesti(syst::Syst, B::Union{SparseMatrixCSC{Int64,Int64},SparseMatrixCSC
                     end
                     if use_iv_pairs
                         # Build index-value pairs: (a_list, ind_list, v_list)
-                        N_ii = nxyz_data*M_ii; # number of nonzero elements in the jj-th part of matrix C_ii
+                        N_ii = nxyz_data*M_ii # number of nonzero elements in the jj-th part of matrix C_ii
                         ind_temp = N .+ (1:N_ii)
                         ind_list[ind_temp] = repeat(ind, M_ii) # spatial index
                         a_list[ind_temp] = reshape(repeat(M.+(1:M_ii), nxyz_data), N_ii) # input index
@@ -1771,7 +1771,7 @@ function mesti(syst::Syst, B::Union{SparseMatrixCSC{Int64,Int64},SparseMatrixCSC
     if info.opts.exclude_PML_in_field_profiles
         # Exclude the PML pixels from the returned field profiles
         if ~use_2D_TM
-            n_start = 1; n_Ex_end = nx; n_Ey_end = nx; 
+            n_start = 1; n_Ex_end = nx; n_Ey_end = nx
             Ex = reshape(S[1:nt_Ex, :], nx_Ex, ny_Ex, nz_Ex, M)[(info.xPML[1].npixels+1):(nx_Ex-info.xPML[2].npixels),(info.yPML[1].npixels+1):(ny_Ex-info.yPML[2].npixels),(info.zPML[1].npixels+1):(nz_Ex-info.zPML[2].npixels),:]
             Ey = reshape(S[nt_Ex+1:nt_Ex+nt_Ey, :], nx_Ey, ny_Ey, nz_Ey, M)[(info.xPML[1].npixels+1):(nx_Ey-info.xPML[2].npixels),(info.yPML[1].npixels+1):(ny_Ey-info.yPML[2].npixels),(info.zPML[1].npixels+1):(nz_Ey-info.zPML[2].npixels),:]
             Ez = reshape(S[nt_Ex+nt_Ey+1:nt_Ex+nt_Ey+nt_Ez, :], nx_Ez, ny_Ez, nz_Ez, M)[(info.xPML[1].npixels+1):(nx_Ez-info.xPML[2].npixels),(info.yPML[1].npixels+1):(ny_Ez-info.yPML[2].npixels),(info.zPML[1].npixels+1):(nz_Ez-info.zPML[2].npixels),:]

@@ -11,7 +11,7 @@ syst.wavelength = 1 # vacuum wavelength
 syst.dx = 1/resolution # grid size
 
 # Use optimized PML parameters for this resolution to reduce error
-zpml = get_optimal_PML(syst.wavelength/syst.dx)
+zpml = mesti_optimal_pml_params(syst.wavelength/syst.dx)
 zpml.npixels = 30
 syst.zPML = [zpml] 
 k0dx = 2*pi/syst.wavelength*syst.dx # Dimensionless frequency k0*dx

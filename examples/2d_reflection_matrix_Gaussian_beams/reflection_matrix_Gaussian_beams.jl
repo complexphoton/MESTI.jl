@@ -56,7 +56,7 @@ heatmap(z, y, epsilon_xx,
 # total-field/scattered-field (TF/SF) method. But since the cross section
 # of the beam decays exponentially in y, we can generate Gaussian beams to
 # a high accuracy simply by placing line sources at a cross section on the
-# left, which is what we do here. We place the line sources at z =
+# low side, which is what we do here. We place the line sources at z =
 # z_source, just in front of the PML.
 #
 # To determine the required line sources, we (1) take the field profile

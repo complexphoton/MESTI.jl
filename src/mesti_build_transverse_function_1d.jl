@@ -1,5 +1,5 @@
 """
-    BUILD_TRANSVERSE_FUNCTION_1D sets up 1D transverse function and wave number in the homogeneous space.
+    MESTI_BUILD_TRANSVERSE_FUNCTION_1D sets up 1D transverse function and wave number.
 
         === Input Arguments ===
         nx (positive integer scalar; required):
@@ -44,7 +44,7 @@
             and are ordered from small to large. 
 
 """
-function build_transverse_function_1d(nx::Int64, xBC::Union{String,Int64,Float64}, n0::Union{Int64,Float64}=0, offset::Bool=false)    
+function mesti_build_transverse_function_1d(nx::Int64, xBC::Union{String,Int64,Float64}, n0::Union{Int64,Float64}=0, offset::Bool=false)    
     # Check input parameters        
     if ~(nx>=0)
         throw(ArgumentError("Input argument nx must be a natural number."))
@@ -66,7 +66,7 @@ function build_transverse_function_1d(nx::Int64, xBC::Union{String,Int64,Float64
         xBC = "Bloch"
     end
 
-    # f = [f(1), ..., f(nx)].'; 
+    # f = [f(1), ..., f(nx)].'
     # For periodic and Bloch periodic boundary, we order kxdx_all such that it increases monotonically from negative to positive
     # For other boundary conditions, kx >= 0, and we order kxdx_all such that it increases monotonically from smallest to largest
     # Transverse modes in x (form a complete basis in x)
@@ -121,7 +121,7 @@ function build_transverse_function_1d(nx::Int64, xBC::Union{String,Int64,Float64
     return fun_u_1d, kxdx_all
 end
 """
-    BUILD_HOMOGENEOUS_TRANSVERSE_FUNCTION_1D_DERIVATIVE sets up derivative of a transverse function.
+    MESTI_BUILD_TRANSVERSE_FUNCTION_1D_DERIVATIVE sets up derivative of a transverse function.
 
         === Input Arguments ===
         nx (positive integer scalar; required):
@@ -154,7 +154,7 @@ end
                 when the input is a vector, it returns a matrix where each column
                 is the respective derivative transverse profile. 
 """
-function build_transverse_function_1d_derivative(nx::Int64, xBC::Union{String,Int64,Float64}, n0::Union{Int64,Float64}=0, changegrid::Union{Int64,Float64}=0)    
+function mesti_build_transverse_function_1d_derivative(nx::Int64, xBC::Union{String,Int64,Float64}, n0::Union{Int64,Float64}=0, changegrid::Union{Int64,Float64}=0)    
     # Check input parameters        
     if ~(nx>=0)
         error("Input argument nx must be a natural number.")

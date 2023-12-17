@@ -3,7 +3,7 @@ export Side
 
 mutable struct Side
     # A composite data type to store the items on a side
-    # See also: setup_longitudinal
+    # See also: mesti_setup_longitudinal
     N_prop::Integer
     kzdx_all::Vector{ComplexF64}
     ind_prop::Vector{Int64}
@@ -16,7 +16,7 @@ mutable struct Side
 end
 
 """
-    SETUP_LONGITUDINAL sets up a structure "Side" for one component in the homogeneous space.
+    MESTI_SETUP_LONGITUDINAL sets up a structure "Side" for one component in the homogeneous space.
         === Input Arguments === 
         k0dx (numeric scalar, real or complex; required):
             Dimensionless frequency, k0*dx = (2*pi/vacuum_wavelength)*dx. 
@@ -83,7 +83,7 @@ end
                 A permutation vector that switches one propagating channel with one
                 having a complex-conjugated transverse profile. Now it only uses in 2D systems.
 """
-function setup_longitudinal(k0dx::Union{Float64,ComplexF64}, epsilon_bg::Union{Int64,Float64,ComplexF64}, kxdx_all::Union{StepRangeLen{Float64}, Vector{Float64}, Nothing}, kydx_all::Union{StepRangeLen{Float64}, Vector{Float64}}, kLambda_x::Union{Int64,Float64,ComplexF64,Nothing}=nothing, kLambda_y::Union{Int64,Float64,ComplexF64,Nothing}=nothing, ind_zero_kx::Union{Int64,Nothing}=nothing, ind_zero_ky::Union{Int64,Nothing}=nothing, use_continuous_dispersion::Bool=false)
+function mesti_setup_longitudinal(k0dx::Union{Float64,ComplexF64}, epsilon_bg::Union{Int64,Float64,ComplexF64}, kxdx_all::Union{StepRangeLen{Float64}, Vector{Float64}, Nothing}, kydx_all::Union{StepRangeLen{Float64}, Vector{Float64}}, kLambda_x::Union{Int64,Float64,ComplexF64,Nothing}=nothing, kLambda_y::Union{Int64,Float64,ComplexF64,Nothing}=nothing, ind_zero_kx::Union{Int64,Nothing}=nothing, ind_zero_ky::Union{Int64,Nothing}=nothing, use_continuous_dispersion::Bool=false)
     
     if kxdx_all == nothing && kLambda_x == nothing && ind_zero_kx == nothing
         use_2D_TM = true 

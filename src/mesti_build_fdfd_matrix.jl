@@ -159,7 +159,7 @@ end
 """
 function mesti_build_fdfd_matrix(epsilon_xx::Union{Array{Int64,3},Array{Float64,3},Array{ComplexF64,3},Matrix{Int64},Matrix{Float64},Matrix{ComplexF64}}, epsilon_xy::Union{Array{Int64,3},Array{Float64,3},Array{ComplexF64,3},Nothing}, epsilon_xz::Union{Array{Int64,3},Array{Float64,3},Array{ComplexF64,3},Nothing}, epsilon_yx::Union{Array{Int64,3},Array{Float64,3},Array{ComplexF64,3},Nothing}, epsilon_yy::Union{Array{Int64,3},Array{Float64,3},Array{ComplexF64,3},Nothing}, epsilon_yz::Union{Array{Int64,3},Array{Float64,3},Array{ComplexF64,3},Nothing}, epsilon_zx::Union{Array{Int64,3},Array{Float64,3},Array{ComplexF64,3},Nothing}, epsilon_zy::Union{Array{Int64,3},Array{Float64,3},Array{ComplexF64,3},Nothing},     epsilon_zz::Union{Array{Int64,3},Array{Float64,3},Array{ComplexF64,3},Nothing}, k0dx::Union{Float64,ComplexF64}, xBC::Union{String,Int64,Float64,ComplexF64,Nothing}, yBC::Union{String,Int64,Float64,ComplexF64}, zBC::Union{String,Int64,Float64,ComplexF64}, xPML::Union{Vector{PML},Nothing} = [PML(0), PML(0)], yPML::Vector{PML} = [PML(0), PML(0)], zPML::Vector{PML} = [PML(0), PML(0)], use_UPML::Bool=true)    
     # Make deepcopy of them to avoid mutating input argument 
-    xPML = deepcopy(xPML); yPML = deepcopy(yPML); zPML = deepcopy(zPML);
+    xPML = deepcopy(xPML); yPML = deepcopy(yPML); zPML = deepcopy(zPML)
     
     # Take care of the 2D TM case
     if ndims(epsilon_xx) == 2
