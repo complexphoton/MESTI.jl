@@ -2,7 +2,7 @@
 
 julia_version = "1.9.3"
 manifest_format = "2.0"
-project_hash = "d1bf6498e523091cf5f1dcd9c3a982504f546eb5"
+project_hash = "caab63edc1fc6bdb914e55e0d2e00e9c0abe26c3"
 
 [[deps.AbbreviatedTypes]]
 deps = ["Reexport", "StaticArrays"]
