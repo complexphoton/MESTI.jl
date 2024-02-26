@@ -933,7 +933,7 @@ end
 """
     MUMPS_ANALYZE_AND_FACTORIZE calls MUMPS to analyze and factorize matrix A (if ind_schur is not given) or to compute its Schur complement (if ind_schur is given)
 """
-function MUMPS_analyze_and_factorize(A::Union{SparseMatrixCSC{Int64, Int64},SparseMatrixCSC{Complex{Int64}, Int64},SparseMatrixCSC{Float64, Int64},SparseMatrixCSC{ComplexF64, Int64}}, opts::Opts, is_symmetric::Bool, ind_schur::Union{UnitRange{Int64},Nothing} = nothing, par = 1::Int64)
+function MUMPS_analyze_and_factorize(A::Union{SparseMatrixCSC{Int64, Int64},SparseMatrixCSC{Complex{Int64}, Int64},SparseMatrixCSC{Float64, Int64},SparseMatrixCSC{ComplexF64, Int64}}, opts::Opts, is_symmetric::Bool, ind_schur::Union{UnitRange{Int64},Nothing} = nothing, par = 1::Int)
 
     ## Initialize MUMPS
     N = size(A,1)

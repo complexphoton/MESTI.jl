@@ -655,7 +655,7 @@ export mesti_subpixel_smoothing
                ]
     end
 
-    function convert_BC_sbpsm(BC::Union{String,Int64,Float64,ComplexF64},direction::String)
+    function convert_BC_sbpsm(BC::Union{String,Real,Complex},direction::String)
         if lowercase(BC) == "pec"
             return "PEC"
         elseif lowercase(BC) == "pmc"
@@ -811,7 +811,7 @@ export mesti_subpixel_smoothing
         return inv_epsilon_yy, inv_epsilon_zz, inv_epsilon_yz
     end
 
-    function Kottke_smoothing(vol_frac::Float64, n0::SVector{3, Float64}, epsilon_object::Union{Array{<:Int},Array{<:Real},Array{<:Complex}}, epsilon_voxel::Union{Array{<:Int},Array{<:Real},Array{<:Complex}})
+    function Kottke_smoothing(vol_frac::Real, n0::SVector{3, Real}, epsilon_object::Union{Array{<:Int},Array{<:Real},Array{<:Complex}}, epsilon_voxel::Union{Array{<:Int},Array{<:Real},Array{<:Complex}})
         Scomp = @SMatrix rand(3,3-1)  # directions complementary to n12; works even for K = 1
         Stemp = [n0 Scomp]  # SMatrix{K,K}
         S = qr(Stemp).Q  # nonallocating; 1st column is normalized n12

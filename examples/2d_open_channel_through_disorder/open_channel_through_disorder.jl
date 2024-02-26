@@ -33,7 +33,6 @@ epsilon_high = 1.0^2  # frees space on the high side
 yBC = "periodic" # boundary condition in y
 
 # generate a random collection of non-overlapping cylinders
-# note: subpixel smoothing is not applied for simplicity
 build_TM = true
 (epsilon_xx, y0_list, z0_list, r0_list, y_Ex, z_Ex) = 
 build_epsilon_disorder(W, L, r_min, r_max, min_sep,  
