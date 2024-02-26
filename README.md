@@ -68,7 +68,17 @@ To install MESTI.jl, simply open the command-line interface of Julia and type:
 import Pkg; Pkg.add("MESTI")
 ```
 
-After installing MESTI.jl, you may also install other packages used in the tests and examples by running <code>[install_packages.jl](./mumps/install_packages.jl)</code>.
+## Test
+
+After installing MESTI.jl, we should also install other packages used in the tests and examples by running <code>[install_packages.jl](./test/install_packages.jl)</code>:
+
+Now, we can run the test script <code>[runtests.jl](./test/runtests.jl)</code> in the [test](./test) folder, which runs
+
+- `matrix_solver_test.jl`
+- `interface_t_r_test.jl`
+- `unitary_test.jl`
+
+If all tests pass successfully, we are done with the tests.
 
 ## Usage Summary 
 
@@ -93,6 +103,34 @@ Detailed documentation is given in comments at the beginning of the function fil
  - [<code>mesti_subpixel_smoothing</code>](./src/mesti_subpixel_smoothing.jl) for <code>mesti_subpixel_smoothing()</code> 
 
 For example, typing <code>? mesti2s</code> in Julia brings up the documentation for <code>mesti2s()</code>.
+
+## Multithreading
+
+MESTI can use multithreading for shared memory parallelization within MUMPS. By default, MUMPS uses the maximum number of threads available on the machine. One can use the field <code>opts.nthreads_OMP</code> of the optional input argument <code>opts</code> to change the number of threads used in MUMPS.
+
+To check the actual number of threads used in MUMPS, set <code>opts.verbal_solver = true</code> in the input argument and look at the standard output from MUMPS. For example, the following output
+```text:Output
+      executing #MPI =      1 and #OMP =      4
+```
+shows that the number of threads used (#OMP) is 4.
+
+Multithreading is used during the factorization and solving stages within MUMPS, but not during the building and analyzing stages. With APF, most of the computing time is spent on factorization (*e.g.*, see Fig 2d of the [APF paper](https://doi.org/10.1038/s43588-022-00370-6)).
+
+## MPI
+
+Since MESTI.jl uses the parallel version of MUMPS, MESTI can also utilize MPI for distributed memory parallelization within MUMPS, making it a viable option with a cluster for computing large systems, where memory usage is a bottleneck. To use MPI, one should prepare the script to construct the system on the main processor and call worker processors when needed. For practical purposes, one would typically use hybrid MPI, which combines multithreading with MPI. This approach allows for the utilization of all threads in a single node through multithreading and the parallelization of multiple nodes through MPI.
+
+The hybrid MPI example script and its corresponding submission script for a cluster (USC Discovery cluster) are provided in the [MPI](./MPI) folder to illustrate its usage. 
+
+To check the actual number of threads and MPI used in MUMPS, set <code>opts.verbal_solver = true</code> in the input argument and look at the standard output from MUMPS. For example, the following output
+
+```text:Output
+      executing #MPI =      2 and #OMP =      4
+```
+
+shows that the number of threads used (#OMP) is 4 and #MPI is 2.
+
+Note that here MPI is used during factorization and solving stages within MUMPS, but not during the building stage. Currently, MPI does not support parallel analysis in APF. With APF, most of the computing time is spent on factorization (*e.g.*, see Fig 2d of the [APF paper](https://doi.org/10.1038/s43588-022-00370-6)).
 
 ## Examples
 
