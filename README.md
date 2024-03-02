@@ -60,25 +60,25 @@ For eigenmode computation, such as waveguide mode solver and photonic band struc
 
 ## Installation
 
-Before installing MESTI.jl, the user should first install the parallel version of the sparse linear solver [MUMPS](https://mumps-solver.org/index.php). Without MUMPS, MESTI.jl can still run but will only use the built-in linear solver, which is significantly slower and uses much more memory (especially in 3D and for large 2D systems). See this [MUMPS installation](./mumps) page for steps to install MUMPS.
+Before installing MESTI.jl, the user first need to install the parallel version of the sparse linear solver [MUMPS](https://mumps-solver.org/index.php). Without MUMPS, MESTI.jl can still run but cannot use the APF method and will only use a conventional method with the built-in linear solver, which can be orders of magnitude slower and uses much more memory (especially in 3D and for large 2D systems). See this [MUMPS installation](./mumps) page for steps to install MUMPS.
 
-To install MESTI.jl, simply open the command-line interface of Julia and type:  
+After the MUMPS installation, to install MESTI.jl, simply open the command-line interface of Julia and type:  
 
 ```julia
 import Pkg; Pkg.add("MESTI")
 ```
 
-## Test
+## Tests
 
-After installing MESTI.jl, we should also install other packages used in the tests and examples by running <code>[install_packages.jl](./test/install_packages.jl)</code>:
+After installation, run <code>[install_packages.jl](./test/install_packages.jl)</code> to install other packages used in the tests and examples.
 
-Now, we can run the test script <code>[runtests.jl](./test/runtests.jl)</code> in the [test](./test) folder, which runs
+Then, run <code>[runtests.jl](./test/runtests.jl)</code> in the [test](./test) folder. This script runs three tests:
 
 - `matrix_solver_test.jl`
 - `interface_t_r_test.jl`
 - `unitary_test.jl`
 
-If all tests pass successfully, we are done with the tests.
+Check if they pass successfully.
 
 ## Usage Summary 
 
@@ -104,33 +104,26 @@ Detailed documentation is given in comments at the beginning of the function fil
 
 For example, typing <code>? mesti2s</code> in Julia brings up the documentation for <code>mesti2s()</code>.
 
-## Multithreading
+## Multithreading and MPI
 
-MESTI can use multithreading for shared memory parallelization within MUMPS. By default, MUMPS uses the maximum number of threads available on the machine. One can use the field <code>opts.nthreads_OMP</code> of the optional input argument <code>opts</code> to change the number of threads used in MUMPS.
+MESTI.jl can use both distributed memory parallelization across nodes/sockets through MPI and shared memory parallelization within one node/socket through multithreading (if MUMPS was compiled with multithreading enabled). The multithreading speed-up comes mainly from using a multithreaded BLAS library inside MUMPS. Parts of the MUMPS code also use multithreading through OpenMP directives.
+With APF, most of the computing time is spent on factorization within MUMPS (*e.g.*, see Fig 2d of the [APF paper](https://doi.org/10.1038/s43588-022-00370-6)). The factorization and solving stages within MUMPS are parallelized. The building and analyzing stages are not performance critical and are not parallelized.
 
-To check the actual number of threads used in MUMPS, set <code>opts.verbal_solver = true</code> in the input argument and look at the standard output from MUMPS. For example, the following output
-```text:Output
-      executing #MPI =      1 and #OMP =      4
-```
-shows that the number of threads used (#OMP) is 4.
+In MUMPS, multithreading is more efficient than MPI, both in speed and in memory usage. So, we should maximize multhreading before using MPI. For example, if we use one node with a single socket having 8 cores (where the 8 cores sharing the same memory), we should use one MPI process (*i.e.*, no MPI) with 8 threads, instead of 8 MPI processes with one thread each. As another example, if we use 3 nodes, each node has 2 sockets, and each socket has 4 cores sharing the same memory of that socket (so, 24 cores in total), we should use 6 MPI processes (one per socket) with 4 threads per MPI process, instead of 24 MPI processes with one thread each.
 
-Multithreading is used during the factorization and solving stages within MUMPS, but not during the building and analyzing stages. With APF, most of the computing time is spent on factorization (*e.g.*, see Fig 2d of the [APF paper](https://doi.org/10.1038/s43588-022-00370-6)).
+The default number of threads is the number of cores available on the machine (either the number of physical cores, or the number of cores requested when running the job with a scheduler like Slurm on a cluster). Therefore, we only need to launch MESTI with the number of MPI processes equaling the total number of sockets.
 
-## MPI
+We can set the number of threads to be different from the default by setting the environment variable <code>OMP_NUM_THREADS</code> or the field <code>opts.nthreads_OMP</code> of the optional input argument <code>opts</code>.
 
-Since MESTI.jl uses the parallel version of MUMPS, MESTI can also utilize MPI for distributed memory parallelization within MUMPS, making it a viable option with a cluster for computing large systems, where memory usage is a bottleneck. To use MPI, one should prepare the script to construct the system on the main processor and call worker processors when needed. For practical purposes, one would typically use hybrid MPI, which combines multithreading with MPI. This approach allows for the utilization of all threads in a single node through multithreading and the parallelization of multiple nodes through MPI.
+To use MPI, we should prepare the script to construct the system on the main processor and call worker processors when needed. An example script and its corresponding submission script on a cluster are provided in the [MPI](./MPI) folder. 
 
-The hybrid MPI example script and its corresponding submission script for a cluster (USC Discovery cluster) are provided in the [MPI](./MPI) folder to illustrate its usage. 
-
-To check the actual number of threads and MPI used in MUMPS, set <code>opts.verbal_solver = true</code> in the input argument and look at the standard output from MUMPS. For example, the following output
+To check the actual number of MPI processes and threads used in MUMPS, set <code>opts.verbal_solver = true</code> in the input argument and look at the standard output from MUMPS. For example, the following output
 
 ```text:Output
       executing #MPI =      2 and #OMP =      4
 ```
 
-shows that the number of threads used (#OMP) is 4 and #MPI is 2.
-
-Note that here MPI is used during factorization and solving stages within MUMPS, but not during the building stage. Currently, MPI does not support parallel analysis in APF. With APF, most of the computing time is spent on factorization (*e.g.*, see Fig 2d of the [APF paper](https://doi.org/10.1038/s43588-022-00370-6)).
+shows 2 MPI processes with 4 threads each.
 
 ## Examples
 
@@ -153,7 +146,9 @@ Here are some animations from the examples above:
    <img src="./examples/2d_focusing_inside_disorder_with_phase_conjugation/phase_conjugated_focusing.gif" width="540" height="360"> 
 3. Reflection matrix of a scatterer in Gaussian-beam basis:
    <img src="./examples/2d_reflection_matrix_Gaussian_beams/reflection_matrix_Gaussian_beams.gif" width="432" height="288">
-
+4. [Inverse designed wide-field-of-view metalens](https://github.com/complexphoton/metalens_inverse_design)
+   <img src="https://github.com/complexphoton/MESTI.jl/assets/68754706/c87f1e1c-0105-40ef-8879-b46489efc3c3" width="405" height="596">
+   
 ## Acknowledgment
 
 We thank [William Sweeney](https://github.com/wrs28) for granting us permission to integrate his MUMPS-julia interface, [MUMPS3.jl](https://github.com/wrs28/MUMPS3.jl/tree/5.3.3-update), into this package. The files bearing the mumps3 prefix in the [src](./src) directory have been adopted from MUMPS3.jl.
