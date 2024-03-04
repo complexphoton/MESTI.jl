@@ -57,10 +57,12 @@ LPORDDIR = $(topdir)/PORD/lib
 IPORD    = -I$(topdir)/PORD/include
 LPORD    = -L$(LPORDDIR) -lpord
 
-# If METIS has been installed, you can uncomment the following two lines to specify 
-# your own path of METIS.
-#LMETISDIR = /usr/local/lib
-#IMETIS    = -I/usr/local/include
+# It is strongly recommended to install METIS for 3D calculations. The 3D calculations can be
+# extremely slow and time consuming without METIS. You can specify the library and include 
+# directory for METIS in the following two lines
+
+LMETISDIR = /usr/local/lib
+IMETIS    = -I/usr/local/include
 
 # You have to choose one among the following two lines depending on
 # the type of analysis you want to perform. If you want to perform only
@@ -68,17 +70,14 @@ LPORD    = -L$(LPORDDIR) -lpord
 # variable below); for both parallel and sequential analysis choose the second 
 # line (remember to add -Dparmetis in the ORDERINGSF variable below)
 
-# If METIS has been installed, you can uncomment the following line to specify 
-# the library of METIS.
-#LMETIS    = -L$(LMETISDIR) -lmetis
+LMETIS    = -L$(LMETISDIR) -lmetis
 
 # The following variables will be used in the compilation process.
 # Please note that -Dptscotch and -Dparmetis imply -Dscotch and -Dmetis respectively.
 # If you want to use Metis 4.X or an older version, you should use -Dmetis4 instead of -Dmetis
 # or in addition with -Dparmetis (if you are using parmetis 3.X or older).
 
-# Uncomment -Dmetis to the following line if you installed METIS
-ORDERINGSF  = -Dpord #-Dmetis
+ORDERINGSF  = -Dpord -Dmetis
 ORDERINGSC  = $(ORDERINGSF)
 
 LORDERINGS = $(LMETIS) $(LPORD) $(LSCOTCH)
@@ -94,7 +93,7 @@ IORDERINGSC = $(IMETIS) $(ISCOTCH) $(IPORD)
 # PLAT : use it to add a default suffix to the generated libraries
 PLAT    =
 # Library extension, + C and Fortran "-o" option
-# may be different under Windows
+# The shared libraries in /lib are *.dylib instead of *.so on Mac. 
 LIBEXT  = .a
 LIBEXT_SHARED = .dylib
 OUTC    = -o 
@@ -116,21 +115,16 @@ RANLIB  = ranlib
 #RANLIB  = echo
 
 # DEFINE HERE YOUR LAPACK LIBRARY
-
 LAPACK = -framework Accelerate
 
 # SCALAP should define the SCALAPACK and BLACS libraries.
-#SCALAP  = -lscalapack -lblacs
-#SCALAP = -framework Accelerate
-SCALAP =  -L/opt/homebrew/Cellar/scalapack/2.2.0_1/lib -lscalapack
+SCALAP =  -L/opt/homebrew/opt/scalapack/lib -lscalapack
 
 # INCLUDE DIRECTORY FOR MPI
 INCPAR  = -I/opt/homebrew/opt/open-mpi/include 
-#INCPAR  = -I/opt/homebrew/opt/mpich/include
 
 # LIBRARIES USED BY THE PARALLEL VERSION OF MUMPS: $(SCALAP) and MPI
 LIBPAR  = $(SCALAP) $(LAPACK) -L/opt/homebrew/opt/open-mpi/lib -lmpi
-#LIBPAR  = $(SCALAP) $(LAPACK) -L/opt/homebrew/opt/mpich/lib -lmpi
 
 # The parallel version is not concerned by the next two lines.
 # They are related to the sequential library provided by MUMPS,
