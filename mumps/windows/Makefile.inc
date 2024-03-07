@@ -57,11 +57,13 @@ LPORDDIR = $(topdir)/PORD/lib/
 IPORD    = -I$(topdir)/PORD/include/
 LPORD    = -L$(LPORDDIR) -lpord
 
-# If METIS has been installed, you can uncomment the following two lines to specify 
-# your own path of METIS.
-# The following is the path of the METIS on Hsu's group in USC Discovery cluster:
-#LMETISDIR = /usr/local/lib
-#IMETIS    = -I/usr/local/include
+# The following is the path of the METIS by default installation.
+# You may need to modify the path based on your machine.
+# It is strongly recommended to install METIS for 3D calculations. The 3D calculations can be
+# extremely slow and time consuming without METIS. You should specify the library and include 
+# directory for METIS in the following.
+LMETISDIR = /usr/local/lib
+IMETIS    = -I/usr/local/include
 
 # You have to choose one among the following two lines depending on
 # the type of analysis you want to perform. If you want to perform only
@@ -69,9 +71,7 @@ LPORD    = -L$(LPORDDIR) -lpord
 # variable below); for both parallel and sequential analysis choose the second 
 # line (remember to add -Dparmetis in the ORDERINGSF variable below)
 
-# If METIS has been installed, you can uncomment the following line to specify 
-# the library of METIS.
-#LMETIS    = -L$(LMETISDIR) -lmetis
+LMETIS    = -L$(LMETISDIR) -lmetis
 
 # The following variables will be used in the compilation process.
 # Please note that -Dptscotch and -Dparmetis imply -Dscotch and -Dmetis respectively.
@@ -80,7 +80,7 @@ LPORD    = -L$(LPORDDIR) -lpord
 #ORDERINGSF = -Dscotch -Dmetis -Dpord -Dptscotch -Dparmetis
 
 # Uncomment -Dmetis to the following line if you installed METIS
-ORDERINGSF  = -Dpord #-Dmetis
+ORDERINGSF  = -Dpord -Dmetis
 ORDERINGSC  = $(ORDERINGSF)
 
 LORDERINGS = $(LMETIS) $(LPORD) $(LSCOTCH)
