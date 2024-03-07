@@ -50,12 +50,12 @@ to override the <code>clang</code> compiler from Apple.
 
 ### METIS
 
-In 3D system, because METIS ordering is more efficient than AMD ordering, we should install the METIS program for graph partitioning (not to be confused with MESTI).  We can use [METIS](https://github.com/scivision/METIS/tree/743ae96033f31907d89c80e3470c0325e9a97f7b) (version 5.1.0) program for graph partitioning. We can install them in the following steps:
+In 3D system, because METIS ordering is more efficient than AMD ordering, we should install the METIS program for graph partitioning (not to be confused with MESTI).  We can use [METIS](http://glaros.dtc.umn.edu/gkhome/metis/metis/overview) (version 5.1.0) program for graph partitioning. We can install them in the following steps:
 
 (a) Downloading METIS (version 5.1.0)
 
 ```shell
-wget https://github.com/scivision/METIS/blob/743ae96033f31907d89c80e3470c0325e9a97f7b/archive/metis-5.1.0.tar.gz
+wget http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/metis-5.1.0.tar.gz
 ```
 
 (b) Decompress metis-5.1.0.tar.gz

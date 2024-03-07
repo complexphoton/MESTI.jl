@@ -57,11 +57,13 @@ LPORDDIR = $(topdir)/PORD/lib/
 IPORD    = -I$(topdir)/PORD/include/
 LPORD    = -L$(LPORDDIR) -lpord
 
-# If METIS has been installed, you can uncomment the following two lines to specify 
-# your own path of METIS.
-# The following is the path of the METIS on Hsu's group in USC Discovery cluster:
-#LMETISDIR = /project/cwhsu_38/shared/software/metis-5.1.0/build/Linux-x86_64/libmetis
-#IMETIS    = -I/project/cwhsu_38/shared/software/metis-5.1.0/include
+# The following is the path of the METIS on Hsu's group in USC Discovery cluster.
+# Please modify the path based on your machine.
+# It is strongly recommended to install METIS for 3D calculations. The 3D calculations can be
+# extremely slow and time consuming without METIS. You should specify the library and include 
+# directory for METIS in the following.
+LMETISDIR = /project/cwhsu_38/shared/software/metis-5.1.0/build/Linux-x86_64/libmetis
+IMETIS    = -I/project/cwhsu_38/shared/software/metis-5.1.0/include
 
 # You have to choose one among the following two lines depending on
 # the type of analysis you want to perform. If you want to perform only
@@ -69,9 +71,7 @@ LPORD    = -L$(LPORDDIR) -lpord
 # variable below); for both parallel and sequential analysis choose the second 
 # line (remember to add -Dparmetis in the ORDERINGSF variable below)
 
-# If METIS has been installed, you can uncomment the following line to specify 
-# the library of METIS.
-#LMETIS    = -L$(LMETISDIR) -lmetis
+LMETIS    = -L$(LMETISDIR) -lmetis
 
 # The following variables will be used in the compilation process.
 # Please note that -Dptscotch and -Dparmetis imply -Dscotch and -Dmetis respectively.
@@ -79,8 +79,7 @@ LPORD    = -L$(LPORDDIR) -lpord
 # or in addition with -Dparmetis (if you are using parmetis 3.X or older).
 #ORDERINGSF = -Dscotch -Dmetis -Dpord -Dptscotch -Dparmetis
 
-# Uncomment -Dmetis to the following line if you installed METIS
-ORDERINGSF  = -Dpord #-Dmetis
+ORDERINGSF  = -Dpord -Dmetis
 ORDERINGSC  = $(ORDERINGSF)
 
 LORDERINGS = $(LMETIS) $(LPORD) $(LSCOTCH)
