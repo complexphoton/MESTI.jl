@@ -79,7 +79,6 @@ LMETIS    = -L$(LMETISDIR) -lmetis
 # or in addition with -Dparmetis (if you are using parmetis 3.X or older).
 #ORDERINGSF = -Dscotch -Dmetis -Dpord -Dptscotch -Dparmetis
 
-# Uncomment -Dmetis to the following line if you installed METIS
 ORDERINGSF  = -Dpord -Dmetis
 ORDERINGSC  = $(ORDERINGSF)
 
@@ -104,7 +103,7 @@ FPIC_OPT = -fPIC
 SONAME = -soname
 # Adapt/uncomment RPATH_OPT to avoid modifying
 # LD_LIBRARY_PATH in case of shared libraries
-RPATH_OPT = -Wl,-rpath,/home/hclin/MUMPS_5.6.2/lib/
+RPATH_OPT = -Wl,-rpath,/home/usc/Downloads/MUMPS_5.6.2/lib/
 OUTC    = -o 
 OUTF    = -o 
 # RM : remove files
