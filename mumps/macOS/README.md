@@ -48,44 +48,6 @@ export PATH=/opt/homebrew/opt/llvm/bin:$PATH
 ```
 to override the <code>clang</code> compiler from Apple.
 
-### METIS
-
-In 3D system, because METIS ordering is more efficient than AMD ordering, we should install the METIS program for graph partitioning (not to be confused with MESTI).  We can use [METIS](http://glaros.dtc.umn.edu/gkhome/metis/metis/overview) (version 5.1.0) program for graph partitioning. We can install them in the following steps:
-
-(a) Downloading METIS (version 5.1.0)
-
-```shell
-wget http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/metis-5.1.0.tar.gz
-```
-
-(b) Decompress metis-5.1.0.tar.gz
-
-```shell
-tar zxvf metis-5.1.0.tar.gz
-```
-
-(c) Setting METIS to double precision
-
-```shell
-sed -i "43s/32/64/" metis-5.1.0/include/metis.h
-```
-
-(d) Installing METIS
-
-```shell
-cd metis-5.1.0; make config; sudo make install;
-```
-
-Then, by default, the library file, header file, and binaries will be installed in `/usr/local/lib`, `/usr/local/include`, and `/usr/local/bin`.
-
-In some rare cases, your machine cannot find METIS libraries by itself when you run Julia interface for MUMPS. You can append the METIS libraries to your `LD_LIBRARYP_PATH`
-
-```shell
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LMETISDIR
-```
-
-`LMETISDIR` is the path to the folder where the METIS library is.
-
 ### MUMPS Makefile
 
 The Makefile in MUMPS 5.6.2 and before does not fully support Mac. More specifically, you need to change Line 217 in MUMPS_5.6.2/src/Makefile from
@@ -100,18 +62,4 @@ to
 $(FC) $(OPTL) -shared $^ -Wl,-install_name,libmumps_common$(PLAT)$(LIBEXT_SHARED) -L$(libdir) $(RPATH_OPT) $(LORDERINGS) $(LIBS) $(LIBOTHERS) -o $@
 ```
 
-The <code>soname</code> is used on Linux and we should use <code>install_name</code> on Mac. 
-
-
-### Running MUMPS in Julia
-
-You may need to configure [MPI.jl](https://juliaparallel.org/MPI.jl/stable/configuration/) before running MUMPS in Julia. The steps are straightforward using MPIPreferences.jl. First, install MPIPreferences.jl by entering
-```
-julia --project -e 'using Pkg; Pkg.add("MPIPreferences")'
-```
-in terminal. Then run <code>MPIPreferences.use_system_binary()</code> in Julia or through the command line:
-```
-julia --project -e 'using MPIPreferences; MPIPreferences.use_system_binary()'
-```
-
-This should automatically find the OpenMPI installed above.
+The <code>soname</code> is used on Linux and we should use <code>install_name</code> on Mac.

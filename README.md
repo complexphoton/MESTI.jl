@@ -26,7 +26,7 @@ MESTI.jl is a general-purpose solver with its interface written to provide maxim
  - Any tensor or scalar relative permittivity profile $\bar{\bar{\varepsilon}}({\bf r})$, which can be real-valued or complex-valued.
  - Open boundary modeled by a [perfectly matched layer (PML)](https://en.wikipedia.org/wiki/Perfectly_matched_layer) placed on any side(s), with both imaginary-coordinate and real-coordinate stretching (so the PML can accelerate the attenuation of evanescent waves in addition to attenuating the propagating waves).
 - Periodic, Bloch periodic, perfect electrical conductor (PEC), and/or perfect magnetic conductor (PMC) boundary conditions.
-- [Subpixel smoothing](https://meep.readthedocs.io/en/latest/Subpixel_Smoothing) for the geometric shapes handled by [GeometryPrimitives.jl](https://github.com/stevengj/GeometryPrimitives.jl) through function [<code>mesti_subpixel_smoothing()</code>](./src/mesti_subpixel_smoothing.jl).
+- [Subpixel smoothing](https://meep.readthedocs.io/en/latest/Subpixel_Smoothing) for the geometric shapes handled by [GeometryPrimitives.jl](https://github.com/stevengj/GeometryPrimitives.jl) through function [<code>mesti_subpixel_smoothing()</code>](https://github.com/complexphoton/MESTI.jl/blob/main/src/mesti_subpixel_smoothing.jl).
  - Any material dispersion $\bar{\bar{\varepsilon}}$(*ω*), since this is a frequency-domain method.
  - Any list of input source profiles (user-specified or automatically built).
  - Any list of output projection profiles (or no projection, in which case the complete field profiles are returned).
@@ -35,7 +35,6 @@ MESTI.jl is a general-purpose solver with its interface written to provide maxim
  - Linear solver using MUMPS (requires installation) or the built-in routines in Julia (which uses UMFPACK).
  - Shared memory parallelism (with multithreaded BLAS and with OpenMP in MUMPS) and distributed memory parallelism (with MPI in MUMPS).
  - Single-precision or double-precision arithmetic.
-
 ## When to use MESTI.jl?
 
 MESTI.jl can perform most linear-response computations for arbitrary structures, such as
@@ -59,6 +58,13 @@ Problems that MESTI.jl does not handle:
 For eigenmode computation, such as waveguide mode solver and photonic band structure computation, one can use [<code>mesti_build_fdfd_matrix.jl</code>](./src/mesti_build_fdfd_matrix.jl) to build the matrix and then compute its eigenmodes. However, we don't currently provide a dedicated function to do so.
 
 ## Installation
+MESTI.jl is written and run in Julia programming language. Follow the standard process to download and install Julia. We can download Julia [here](https://julialang.org/downloads/). Suppose we installed the 1.9.3 version of Julia. After Julia is installed, we can add the path of your Julia to <code>PATH</code> through the terminal by 
+
+```shell
+export PATH=".../julia-1.9.3/bin/"
+```
+
+where  <code>... </code> is the path to your Julia.
 
 Before installing MESTI.jl, the user first need to install the parallel version of the sparse linear solver [MUMPS](https://mumps-solver.org/index.php). Without MUMPS, MESTI.jl can still run but cannot use the APF method and will only use a conventional method with the built-in linear solver, which can be orders of magnitude slower and uses much more memory (especially in 3D and for large 2D systems). See this [MUMPS installation](./mumps) page for steps to install MUMPS.
 
@@ -69,16 +75,22 @@ import Pkg; Pkg.add("MESTI")
 ```
 
 ## Tests
+After compiling MUMPS and installation MESTI.jl, run <code>[install_packages.jl](./test/install_packages.jl)</code> to install other Julia packages used in the tests and examples.
 
-After installation, run <code>[install_packages.jl](./test/install_packages.jl)</code> to install other packages used in the tests and examples.
+Now we are ready to run the following test scripts
+
+- <code>[basic_solve.jl](./mumps/basic_solve.jl)</code>
+- <code>[schur_complement.jl](./mumps/schur_complement.jl)</code>
+
+If any of them does not run successfully, please look back at the compilation of MUMPS or the Julia interface to see if there were serious warning messages.
 
 Then, run <code>[runtests.jl](./test/runtests.jl)</code> in the [test](./test) folder. This script runs three tests:
 
-- `matrix_solver_test.jl`
-- `interface_t_r_test.jl`
-- `unitary_test.jl`
+- <code>[matrix_solver_test.jl](./test/matrix_solver_test.jl)</code>
+- <code>[interface_t_r_test.jl](./test/interface_t_r_test.jl)</code>
+- <code>[unitary_test.jl](./test/unitary_test.jl)</code>
 
-Check if they pass successfully.
+If all pass, congratulations! You are done and be able to run MESTI.jl with MUMPS solver.
 
 ## Usage Summary 
 
@@ -130,7 +142,7 @@ shows 2 MPI processes with 4 threads each.
 Examples in the [examples](./examples) folder illustrate the usage and the main functionalities of MESTI. Each example has its own folder, with its <code>.jl</code> and <code>.ipynb</code> script, auxiliary files specific to that example, and a <code>README.md</code> page that shows the example script with its outputs:
 
 - [Open channel in a disordered system](./examples/2d_open_channel_through_disorder): 2D, using <code>mesti2s()</code>, transmission matrix & field profile with customized wavefronts.
-- [Phase-conjugated focusing in disordered system](./examples/2d_focusing_phase_conjugated_light_through_disorder): 2D, using <code>mesti()</code> and <code>mesti2s()</code>, customized source & field profile with customized wavefronts.
+- [Phase-conjugated focusing in disordered system](./examples/2d_focusing_inside_disorder_with_phase_conjugation): 2D, using <code>mesti()</code> and <code>mesti2s()</code>, customized source & field profile with customized wavefronts.
 - [Reflection matrix in Gaussian-beam basis](./examples/2d_reflection_matrix_Gaussian_beams): 2D, using <code>mesti()</code>, reflection matrix in customized basis for a fully open system.
 
 Also see the following repository:
@@ -144,7 +156,7 @@ Here are some animations from the examples above:
    <img src="./examples/2d_open_channel_through_disorder/disorder_open_channel.gif" width="540" height="360"> 
 2. Focusing phase-conjugated light through disorder
    <img src="./examples/2d_focusing_inside_disorder_with_phase_conjugation/phase_conjugated_focusing.gif" width="540" height="360"> 
-3. Reflection matrix of a scatterer in Gaussian-beam basis:
+3. Reflection matrix of a scatterer in Gaussian-beam basis
    <img src="./examples/2d_reflection_matrix_Gaussian_beams/reflection_matrix_Gaussian_beams.gif" width="432" height="288">
 4. [Inverse designed wide-field-of-view metalens](https://github.com/complexphoton/metalens_inverse_design)
    <img src="https://github.com/complexphoton/MESTI.jl/assets/68754706/c87f1e1c-0105-40ef-8879-b46489efc3c3" width="405" height="596">
