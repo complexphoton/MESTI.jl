@@ -811,7 +811,7 @@ export mesti_subpixel_smoothing
         return inv_epsilon_yy, inv_epsilon_zz, inv_epsilon_yz
     end
 
-    function Kottke_smoothing(vol_frac::Real, n0::SVector{3, Real}, epsilon_object::Union{Array{<:Int},Array{<:Real},Array{<:Complex}}, epsilon_voxel::Union{Array{<:Int},Array{<:Real},Array{<:Complex}})
+    function Kottke_smoothing(vol_frac::Real, n0::SVector{3, <:Real}, epsilon_object::Union{Array{<:Int},Array{<:Real},Array{<:Complex}}, epsilon_voxel::Union{Array{<:Int},Array{<:Real},Array{<:Complex}})
         Scomp = @SMatrix rand(3,3-1)  # directions complementary to n12; works even for K = 1
         Stemp = [n0 Scomp]  # SMatrix{K,K}
         S = qr(Stemp).Q  # nonallocating; 1st column is normalized n12
