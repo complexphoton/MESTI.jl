@@ -1344,7 +1344,7 @@ function mesti(syst::Syst, B::Union{SparseMatrixCSC{Int64,Int64},SparseMatrixCSC
                 end
             end
         end
-        if ~isassigned(B_ii)
+        if ~isassigned(B_ii,1) && ~isassigned(B_ii,2) && ~isassigned(B_ii,3)
             throw(ArgumentError("B cannot be no source for all x, y, and z components."))            
         end
         for ii = 1:length(B_ii)
@@ -1563,7 +1563,7 @@ function mesti(syst::Syst, B::Union{SparseMatrixCSC{Int64,Int64},SparseMatrixCSC
                 end
             end
         end      
-        if ~isassigned(C_ii)
+        if ~isassigned(C_ii,1) && ~isassigned(C_ii,2) && ~isassigned(C_ii,3)
             throw(ArgumentError("C cannot be no source for all x, y, and z components."))            
         end
         for ii = 1:length(C_ii)
