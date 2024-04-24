@@ -144,6 +144,7 @@ Examples in the [examples](./examples) folder illustrate the usage and the main 
 - [Open channel in a disordered system](./examples/2d_open_channel_through_disorder): 2D, using <code>mesti2s()</code>, transmission matrix & field profile with customized wavefronts.
 - [Phase-conjugated focusing in disordered system](./examples/2d_focusing_inside_disorder_with_phase_conjugation): 2D, using <code>mesti()</code> and <code>mesti2s()</code>, customized source & field profile with customized wavefronts.
 - [Reflection matrix in Gaussian-beam basis](./examples/2d_reflection_matrix_Gaussian_beams): 2D, using <code>mesti()</code>, reflection matrix in customized basis for a fully open system.
+- [Metalens focusing via angular spectrum propagation](./examples/2d_metalens_focusing_via_angular_spectrum_propagation): 2D, using <code>mesti()</code>, focusing field calculated using angular spectrum propagation.
 
 Also see the following repository:
 - [metalens_inverse_design](https://github.com/complexphoton/metalens_inverse_design): Using MESTI.jl to perform multi-angle inverse design of a wide-field-of-view metalens.
@@ -159,7 +160,7 @@ Here are some animations from the examples above:
 3. Reflection matrix of a scatterer in Gaussian-beam basis
    <img src="./examples/2d_reflection_matrix_Gaussian_beams/reflection_matrix_Gaussian_beams.gif" width="432" height="288">
 4. [Inverse designed wide-field-of-view metalens](https://github.com/complexphoton/metalens_inverse_design)
-   <img src="https://github.com/complexphoton/MESTI.jl/assets/68754706/c87f1e1c-0105-40ef-8879-b46489efc3c3" width="405" height="596">
+   <img src="https://github.com/complexphoton/MESTI.jl/assets/109620064/cfe707e5-445b-40b8-ab9a-6275041b1a7a" width="405" height="596">
    
 ## Acknowledgment
 
