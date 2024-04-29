@@ -96,6 +96,7 @@ PLAT    =
 # The shared libraries in /lib are *.dylib instead of *.so on Mac. 
 LIBEXT  = .a
 LIBEXT_SHARED = .dylib
+SONAME = -install_name
 OUTC    = -o 
 OUTF    = -o 
 # RM : remove files

@@ -47,19 +47,3 @@ brew install scalapack open-mpi llvm
 export PATH=/opt/homebrew/opt/llvm/bin:$PATH
 ```
 to override the <code>clang</code> compiler from Apple.
-
-### MUMPS Makefile
-
-The Makefile in MUMPS 5.6.2 and before does not fully support Mac. More specifically, you need to change Line 217 in MUMPS_5.6.2/src/Makefile from
-
-```
-$(FC) $(OPTL) -shared $^ -Wl,$(SONAME),libmumps_common$(PLAT)$(LIBEXT_SHARED) -L$(libdir) $(RPATH_OPT) $(LORDERINGS) $(LIBS) $(LIBOTHERS) -o $@
-```
-
-to
-
-```
-$(FC) $(OPTL) -shared $^ -Wl,-install_name,libmumps_common$(PLAT)$(LIBEXT_SHARED) -L$(libdir) $(RPATH_OPT) $(LORDERINGS) $(LIBS) $(LIBOTHERS) -o $@
-```
-
-The <code>soname</code> is used on Linux and we should use <code>install_name</code> on Mac.
