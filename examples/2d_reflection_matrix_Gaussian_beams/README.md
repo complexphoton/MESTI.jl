@@ -45,7 +45,7 @@ heatmap(z, y, epsilon_xx,
        c = cgrad(:grayC, rev=true))
 ```
 
-<img src="reflection_matrix_Gaussian_beams_permittivity_profile.png"> 
+![reflection_matrix_Gaussian_beams_permittivity_profile](https://github.com/complexphoton/MESTI.jl/assets/44913081/2d291b84-f628-4073-aaeb-0a8c505729f9)
 
 # Build the input sources
 
@@ -134,7 +134,7 @@ heatmap(1:M_in, collect(y), abs.(B_low),
         title="|B_low|", c =cgrad(:grayC, rev=true))
 ```
 
-<img src="reflection_matrix_Gaussian_beams_abs_B_low.png"> 
+![reflection_matrix_Gaussian_beams_abs_B_low](https://github.com/complexphoton/MESTI.jl/assets/44913081/89ccfb16-069e-4939-aa49-c72e9bf44ac2)
 
 # Build the output projections
 
@@ -284,4 +284,4 @@ end
 gif(anim, "reflection_matrix_Gaussian_beams.gif", fps = 10)
 ```
 
-![reflection_matrix_Gaussian_beams.gif](reflection_matrix_Gaussian_beams.gif)
+![reflection_matrix_Gaussian_beams.gif](https://github.com/complexphoton/MESTI.jl/assets/44913081/27a99177-8ee1-4106-8bce-4e4166a1214c)

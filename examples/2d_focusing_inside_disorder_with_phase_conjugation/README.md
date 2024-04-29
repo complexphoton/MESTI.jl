@@ -190,7 +190,8 @@ end
 gif(anim_regular_focusing, "regular_focusing.gif", fps = 10)
 ```
 
-![regular_focusing.gif](regular_focusing.gif)
+![regular_focusing.gif](https://github.com/complexphoton/MESTI.jl/assets/44913081/afe8fc44-6a50-4ff3-b45b-9d18365e0e1a)
+
 ```julia
 # animate the field profile of the phase-conjugated focusing input
 anim_phase_congjuation = @animate for ii ∈ 0:(nframes_per_period-1)
@@ -203,7 +204,7 @@ end
 gif(anim_phase_congjuation_focusing, "phase_conjugated_focusing.gif", fps = 10)
 ```
 
-![phase_conjugated_focusing.gif](phase_conjugated_focusing.gif)
+![phase_conjugated_focusing.gif](https://github.com/complexphoton/MESTI.jl/assets/44913081/3bd7d0fc-ee13-4443-8f60-b9ae385939af)
 
 ```julia
 # plot the intensity profiles and compare them
@@ -256,7 +257,8 @@ end
 intensity_plot = plot(plt3, plt4, layout = @layout([a b]), size=(800, 400))
 display(intensity_plot)
 ```
-![intensity_comparison.png](intensity_comparison.png)
+
+![intensity_comparison](https://github.com/complexphoton/MESTI.jl/assets/44913081/e98d33c5-bd5a-43a6-b146-60fdc7ee95c0)
 
 ```julia
 # compare the ratio of intensity on the focus point
