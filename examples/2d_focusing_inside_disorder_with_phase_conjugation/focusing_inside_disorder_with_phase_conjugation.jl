@@ -18,7 +18,7 @@ include("build_epsilon_disorder.jl")
 dx      = 1/15  # discretization grid size
 W       = 360   # width of the scattering region
 L       = 90    # thickness of the scattering region
-L_tot   = 150   # full length of the system for plotting
+L_tot   = 270   # full length of the system for plotting
 r_min   = 0.2   # minimal radius of the cylindrical scatterers
 r_max   = 0.4   # maximal radius of the cylindrical scatterers
 min_sep = 0.05  # minimal separation between cylinders
@@ -28,8 +28,8 @@ rng_seed = 0   # random number generator seed
 # relative permittivity, unitless
 epsilon_scat = 1.2^2  # cylindrical scatterers
 epsilon_bg   = 1.0^2  # background in the scattering region
-epsilon_low  = 1.0^2  # frees space on the low side
-epsilon_high = 1.0^2  # frees space on the high side
+epsilon_low  = 1.0^2  # free space on the low side
+epsilon_high = 1.0^2  # free space on the high side
 
 yBC = "periodic" # boundary condition in y
 
@@ -145,18 +145,22 @@ z_Ex = vcat(z_Ex[1] .- (opts.nz_low:-1:1)*dx, z_Ex, z_Ex[end] .+ (1:opts.nz_high
 # animate the field profile with the regular focusing input
 anim_regular_focusing = @animate for ii ∈ 0:(nframes_per_period-1)
     plt1 = (heatmap(z_Ex, collect(y_Ex), real.(Ex[:,:,1]*exp(-1im*2*π*ii/nframes_per_period)),
-            xlabel = "z", ylabel = "y", c = :balance, clims=(-1, 1), aspect_ratio=:equal, dpi = 450,
-            xlimits=(-25,115), ylimits=(0,360)))
+             c = :balance, clims=(-1, 1), legend = :none,
+             aspect_ratio=:equal, dpi = 450, 
+             ticks = false, framestyle = :none,
+             xlimits=(-90,180), ylimits=(0,360)))
     scatter!(plt1, z0_list, y0_list, markersize=r0_list, alpha=0.3, 
              color=:black, legend=false, dpi = 450)
 end
-gif(anim_regular_focusing, "regular_focusing.gif", fps = 10)
+gif(anim_regular_focusing, "regular_focusing.gif", fps = 5)
 
 # animate the field profile of the phase-conjugated focusing input
 anim_phase_congjuation = @animate for ii ∈ 0:(nframes_per_period-1)
     plt2 = (heatmap(z_Ex, collect(y_Ex), real.(Ex[:,:,2]*exp(-1im*2*π*ii/nframes_per_period)),
-            xlabel = "z", ylabel = "y", c = :balance, clims=(-1, 1), aspect_ratio=:equal, dpi = 450,
-            xlimits=(-25,115), ylimits=(0,360)))
+             c = :balance, clims=(-1, 1), legend = :none,
+             aspect_ratio=:equal, dpi = 450, 
+             ticks = false, framestyle = :none,
+             xlimits=(-90,180), ylimits=(0,360)))
     scatter!(plt2, z0_list, y0_list,markersize=r0_list, alpha=0.3, 
              color=:black, legend=false, dpi = 450)   
 end

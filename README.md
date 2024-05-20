@@ -118,8 +118,9 @@ For example, typing <code>? mesti2s</code> in Julia brings up the documentation 
 
 ## Multithreading and MPI
 
-MESTI.jl can use both distributed memory parallelization across nodes/sockets through MPI and shared memory parallelization within one node/socket through multithreading (if MUMPS was compiled with multithreading enabled). The multithreading speed-up comes mainly from using a multithreaded BLAS library inside MUMPS. Parts of the MUMPS code also use multithreading through OpenMP directives.
-With APF, most of the computing time is spent on factorization within MUMPS (*e.g.*, see Fig 2d of the [APF paper](https://doi.org/10.1038/s43588-022-00370-6)). The factorization and solving stages within MUMPS are parallelized. The building and analyzing stages are not performance critical and are not parallelized.
+MESTI.jl can use both distributed memory parallelization across nodes/sockets through MPI and shared memory parallelization within one node/socket through multithreading (if MUMPS was compiled with multithreading enabled). The multithreading speed-up comes from using a multithreaded BLAS library and L0-threads feature in MUMPS. Parts of the MUMPS utilize multithreading with L0-threads through OpenMP directives. With APF, most of the computing time is spent on factorization within MUMPS (*e.g.*, see Fig 2d of the [APF paper](https://doi.org/10.1038/s43588-022-00370-6)). The factorization and solving stages within MUMPS are parallelized. The building and analyzing stages are not performance-critical and are not parallelized.
+
+L0-threads (see the MUMPS Users' guide for details) in multithreading enhances the time performance, but marginally increases the memory usage. It is enabled by default when it is in 1D, 2D, or 2.5D ((width in *x*)*(width in *y*)/(thickness in *z*) $\geqslant 100$). In full 3D ((width in *x*)*(width in *y*)/(thickness in *z*) $< 100$), memory usage is critical and we do not use L0-threads by default. We can change from the default by setting the field `opts.use_L0_threads` in the input argument `opts`.
 
 In MUMPS, multithreading is more efficient than MPI, both in speed and in memory usage. So, we should maximize multhreading before using MPI. For example, if we use one node with a single socket having 8 cores (where the 8 cores sharing the same memory), we should use one MPI process (*i.e.*, no MPI) with 8 threads, instead of 8 MPI processes with one thread each. As another example, if we use 3 nodes, each node has 2 sockets, and each socket has 4 cores sharing the same memory of that socket (so, 24 cores in total), we should use 6 MPI processes (one per socket) with 4 threads per MPI process, instead of 24 MPI processes with one thread each.
 
@@ -154,14 +155,13 @@ Also see the following repository:
 Here are some animations from the examples above:
 
 1. Open channel propagating through disorder
-   <img src="https://github.com/complexphoton/MESTI.jl/assets/44913081/5fe96d41-029c-4335-bf76-177c8abb5600" width="540" height="360">
+   <img src="https://github.com/complexphoton/MESTI.jl/assets/44913081/68421516-db18-4793-9ef5-304079671113" width="1080" height="720">
 2. Focusing phase-conjugated light through disorder
-   <img src="https://github.com/complexphoton/MESTI.jl/assets/44913081/3bd7d0fc-ee13-4443-8f60-b9ae385939af" width="540" height="360">
+   <img src="https://github.com/complexphoton/MESTI.jl/assets/44913081/a1ddcb6a-f43a-44c1-a0b0-6a611e57bd98" width="1080" height="720">
 3. Reflection matrix of a scatterer in Gaussian-beam basis
-   <img src="https://github.com/complexphoton/MESTI.jl/assets/44913081/27a99177-8ee1-4106-8bce-4e4166a1214c" width="432" height="288">
+   <img src="https://github.com/complexphoton/MESTI.jl/assets/44913081/27a99177-8ee1-4106-8bce-4e4166a1214c" width="864" height="576">
 4. [Inverse designed wide-field-of-view metalens](https://github.com/complexphoton/metalens_inverse_design)
-   <img src="https://github.com/complexphoton/MESTI.jl/assets/109620064/cfe707e5-445b-40b8-ab9a-6275041b1a7a" width="405" height="596">
-   
+   <img src="https://github.com/complexphoton/MESTI.jl/assets/109620064/cfe707e5-445b-40b8-ab9a-6275041b1a7a" width="540" height="795">
 ## Acknowledgment
 
 We thank [William Sweeney](https://github.com/wrs28) for granting us permission to integrate his MUMPS-julia interface, [MUMPS3.jl](https://github.com/wrs28/MUMPS3.jl/tree/5.3.3-update), into this package. The files bearing the mumps3 prefix in the [src](./src) directory have been adopted from MUMPS3.jl.
