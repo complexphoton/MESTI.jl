@@ -2,7 +2,7 @@
 
 **MESTI** (<ins>M</ins>axwell's <ins>E</ins>quations <ins>S</ins>olver with <ins>T</ins>housands of <ins>I</ins>nputs) is an open-source software for full-wave electromagnetic simulations in frequency domain using finite-difference discretization on the [Yee lattice](https://meep.readthedocs.io/en/latest/Yee_Lattice).
 
-MESTI implements the **augmented partial factorization (APF)** method described in [this paper](https://doi.org/10.1038/s43588-022-00370-6). While conventional methods solve Maxwell's equations on every element of the discretization basis set (which contains much more information than is typically needed), APF bypasses such intermediate solution step and directly computes the projected quantities of interest: a generalized scattering matrix given any list of input source profiles and any list of output projection profiles. It can jointly handle thousands of inputs without a loop over them, using fewer computing resources than what a conventional direct method uses to handle a single input. It is exact with no approximation beyond discretization.
+MESTI implements the **augmented partial factorization (APF)** method described in [this paper](https://doi.org/10.1038/s43588-022-00370-6). While conventional methods solve Maxwell's equations on every element of the discretization basis set (which contains much more information than is typically needed), APF bypasses such intermediate solution step and directly computes the projected quantities of interest: a generalized scattering matrix given any list of input source profiles and any list of output projection profiles. It can jointly handle thousands of inputs without a loop over them, using fewer computing resources than what a conventional direct method uses to handle a single input. It is exact with no approximation beyonddiscretization.
 
 The MESTI.jl package here provides all the features in the 2D MATLAB version [MESTI.m](https://github.com/complexphoton/MESTI.m) and additionally supports 3D vectorial systems, anisotropic *ε*, MPI parallelization, both single-precision and double-precision arithmetics, and can perform subpixel smoothing for the geometric shapes handled by [GeometryPrimitives.jl](https://github.com/stevengj/GeometryPrimitives.jl). It is written in Julia.
 
@@ -66,23 +66,23 @@ export PATH=".../julia-1.9.3/bin/"
 
 where  <code>...</code> is the path to your Julia.
 
-Before installing MESTI.jl, the user first need to install the parallel version of the sparse linear solver [MUMPS](https://mumps-solver.org/index.php). Without MUMPS, MESTI.jl can still run but cannot use the APF method and will only use a conventional method with the built-in linear solver, which can be orders of magnitude slower and uses much more memory (especially in 3D and for large 2D systems). See this [MUMPS installation](./mumps) page for steps to install MUMPS.
+Before installing MESTI.jl, the user first need to install the parallel version of the sparse linear solver [MUMPS](https://mumps-solver.org/index.php). Without MUMPS, MESTI.jl can still run but cannot use the APF method and will only use a conventional method with the built-in linear solver, which can be orders of magnitude slower and uses much more memory (especially in 3D and for large 2D systems). See this [MUMPS installation](./mumps) page for steps to install MUMPS. For this MESTI (v0.4.3) version, it is compatible with MUMPS versions between v5.3.3 and v5.6.2. It is not compatible with MUMPS versions v5.7.0 or v5.7.1. 
 
-After the MUMPS installation, if you have a clean Julia environment (*i.e.* have not installed any Julia package before or have not installed new version of [Makie.jl](https://github.com/MakieOrg/Makie.jl)(v.0.20 and v.0.21) and [GeometryPrimitives.jl](https://github.com/stevengj/GeometryPrimitives.jl)(v.0.5.0), you can install MESTI.jl (v.0.4.2) by opening the command-line interface of Julia and typing:  
+After the MUMPS installation, if you have a clean Julia environment (*i.e.* have not installed any Julia package before or have not installed new version of [Makie.jl](https://github.com/MakieOrg/Makie.jl)(v0.20 and v0.21) and [GeometryPrimitives.jl](https://github.com/stevengj/GeometryPrimitives.jl)(v0.5.0), you can install MESTI.jl (v0.4.3) by opening the command-line interface of Julia and typing:  
 
 ```julia
 import Pkg; Pkg.add("MESTI")
 ```
 
-On the other hand, if you have installed these two Julia packages: the new version of [Makie.jl](https://github.com/MakieOrg/Makie.jl)(v.0.20 and v.0.21) and [GeometryPrimitives.jl](https://github.com/stevengj/GeometryPrimitives.jl)(v.0.5.0). You will encounter some compatibility problems and the installation will fail. In this case, please run 
+On the other hand, if you have installed these two Julia packages: the new version of [Makie.jl](https://github.com/MakieOrg/Makie.jl)(v0.20 and v0.21) and [GeometryPrimitives.jl](https://github.com/stevengj/GeometryPrimitives.jl)(v0.5.0). You will encounter some compatibility problems and the installation will fail. In this case, please run 
 
 ```julia
 import Pkg; Pkg.add(Pkg.PackageSpec(;name="Makie", version="0.19.12")); Pkg.add("GeometryPrimitives"); Pkg.add("MESTI")
 ```
 
-to downgrade them to the old version compatible with our MESTI.jl and then install MESTI.jl(v.0.4.2).
+to downgrade them to the old version compatible with our MESTI.jl and then install MESTI.jl(v0.4.3).
 
-After installing MESTI.jl, if the user happens to run the command to upgrade every Julia package to the latest version, such as *Pkg.update()*, it would install the latest version of Makie.jl and make MESTI.jl not compatible with it. So please rerun the line below to downgrade to the compatible version and reinstall MESTI.jl.
+After installing MESTI.jl, if the user happens to run the command to upgrade every Julia package to the latest version, such as *Pkg.update()*, it would install the latest version of Makie.jl and make MESTI.jl not compatible with it. So please rerun the line above to downgrade to the compatible version and reinstall MESTI.jl.
 
 To see whether you install the right version, you can always check the version of MESTI by opening the command-line interface of Julia and typing: 
 
@@ -93,7 +93,7 @@ import Pkg; Pkg.status("MESTI")
 If you want our latest MESTI.jl, it should show
 
 ```julia
-[8d7f31fa] MESTI v0.4.2
+[8d7f31fa] MESTI v0.4.3
 ```
 
 ## Tests

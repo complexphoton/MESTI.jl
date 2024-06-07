@@ -22,11 +22,9 @@ mutable struct PML
     
     # Construct default parameters from Table 7.1 of Taflove & Hagness's 2005 FDTD book
     # Without specifying pml.npixels
-    PML() = (pml = new(); pml.power_sigma=3.0; pml.alpha_max_over_omega=0.0; 
-              pml.power_alpha=1.0; pml.kappa_max=15.0; pml.power_kappa=3.0; return pml)
+    PML() = (pml = new(); return pml)
     # With specifying pml.npixels   
-    PML(n) = (pml = new(); pml.npixels=n; pml.power_sigma=3.0; pml.alpha_max_over_omega=0.0; 
-              pml.power_alpha=1.0; pml.kappa_max=15.0; pml.power_kappa=3.0; return pml) 
+    PML(n) = (pml = new(); pml.npixels=n; return pml) 
 end
 
 """
@@ -106,27 +104,30 @@ end
           In each case, PML is a PML structure with the following fields:
              npixels (non-negative integer scalar; required): Number of PML pixels.
                 Note this is within syst.epsilon or syst.inv_epsilon.
-             power_sigma (non-negative scalar; optional): Power of the polynomial 
-                grading for the conductivity sigma; defaults to 3.
+             power_sigma (non-negative scalar; optional): 
+                Power of the polynomial grading for the conductivity sigma; 
+                defaults to 3.
              sigma_max_over_omega (non-negative scalar; optional):
-                Conductivity at the end of the PML; defaults to
-                   0.8*(power_sigma+1)/(k0dx*sqrt(epsilon_bg)).
-                where epsilon_bg is the average relative permittivity along the
-                last slice of the PML. This is used to attenuate propagating waves.
-             power_kappa (non-negative scalar; optional): Power of the polynomial
-                grading for the real-coordinate-stretching factor kappa; defaults
-                to 3.
+                Conductivity at the end of the PML; By default, it is
+                set to an optimized value based on resolution and the 
+                background refractive index. This is used to attenuate propagating waves.
+             power_kappa (non-negative scalar; optional): 
+                Power of the polynomial grading for the real-coordinate-stretching 
+                factor kappa; defaults to 3.
              kappa_max (real scalar no smaller than 1; optional):
-                Real-coordinate-stretching factor at the end of the PML; defaults
-                to 15. This is used to accelerate the attenuation of evanescent 
-                waves. kappa_max = 1 means no real-coordinate stretching.
-             power_alpha (non-negative scalar; optional): Power of the polynomial
-                grading for the CFS alpha factor; defaults to 1.
-             alpha_max_over_omega (non-negative scalar; optional): Complex-
-                frequency-shifting (CFS) factor at the beginning of the PML. This
-                is typically used in time-domain simulations to suppress late-time
-                (low-frequency) reflections. We do not use it by default 
-                (alpha_max_over_omega = 0) since we are in frequency domain.
+                Real-coordinate-stretching factor at the end of the PML; By default, 
+                it is set to an optimized value based on resolution and the 
+                background refractive index. This is used to accelerate the attenuation 
+                of evanescent waves. kappa_max = 1 means no real-coordinate stretching.
+             power_alpha (non-negative scalar; optional): 
+                Power of the polynomial grading for the CFS alpha factor; 
+                defaults to 1.
+             alpha_max_over_omega (non-negative scalar; optional): 
+                Complex-frequency-shifting (CFS) factor at the beginning 
+                of the PML. This is typically used in time-domain simulations 
+                to suppress late-time (low-frequency) reflections. 
+                We don't use it by default (alpha_max_over_omega = 0) 
+                since we are in frequency domain.
           We use the following PML coordinate-stretching factor:
              s(p) = kappa(p) + sigma(p)./(alpha(p) - i*omega)
           with
@@ -282,8 +283,8 @@ function mesti_build_fdfd_matrix(epsilon_xx::Union{Array{Int64,3},Array{Float64,
         end
         
         # Set default values for PML parameters
-        yPML = set_PML_params(yPML, k0dx, epsilon_bg_y, "y")  
-        zPML = set_PML_params(zPML, k0dx, epsilon_bg_z, "z")
+        yPML = mesti_set_PML_params(yPML, k0dx, epsilon_bg_y, "y")  
+        zPML = mesti_set_PML_params(zPML, k0dx, epsilon_bg_z, "z")
     else # 3D case
         epsilon_bg_x_Ex = [1, 1]
         epsilon_bg_y_Ey = [1, 1]
@@ -309,9 +310,9 @@ function mesti_build_fdfd_matrix(epsilon_xx::Union{Array{Int64,3},Array{Float64,
         end    
     
         # Set default values for PML parameters
-        xPML = set_PML_params(xPML, k0dx, epsilon_bg_x_Ex, "x")  
-        yPML = set_PML_params(yPML, k0dx, epsilon_bg_y_Ey, "y")
-        zPML = set_PML_params(zPML, k0dx, epsilon_bg_z_Ez, "z")  
+        xPML = mesti_set_PML_params(xPML, k0dx, epsilon_bg_x_Ex, "x")  
+        yPML = mesti_set_PML_params(yPML, k0dx, epsilon_bg_y_Ey, "y")
+        zPML = mesti_set_PML_params(zPML, k0dx, epsilon_bg_z_Ez, "z")  
     end
     
     # Build the first derivative and use Kronecker outer product to go from 1D to 2D or from 1D to 3D
@@ -896,106 +897,4 @@ function build_ave_x_Ex(n_E::Int, BC::Union{String,Real,Complex}, direction::Str
     end
 
     return avg
-end
-
-
-
-"""
-    SET_PML_PARAMS sets default values for PML parameters
-"""
-function set_PML_params(pml::Vector{PML}, k0dx::Union{Real,Complex}, epsilon_bg::Union{Vector{Int64},Vector{Float64}}, direction::String)
-    
-    if ~(length(pml) == 2)
-        throw(ArgumentError("$(direction)PML must be a vector of PML containing two elements."))
-    end
-
-    # No PML on the both sides
-    if (pml[1].npixels == 0 && pml[2].npixels == 0)
-        return pml
-    end
-
-    # loop over PML parameters on two sides
-    for ii = 1:2
-        # Number of PML pixels
-        if ~isdefined(pml[ii], :npixels)
-            throw(ArgumentError("$(direction)PML[$(ii)] must contain field npixels."))
-        else
-            temp = pml[ii].npixels
-            if temp < 0
-                throw(ArgumentError("$(direction)PML[$(ii)].npixels must be a non-negative scalar."))             
-            end
-            if temp == 0
-                continue
-            end
-        end
-
-        # Power of polynomial grading for the conductivity sigma
-        if ~isdefined(pml[ii], :power_sigma)
-            # From Table 7.1 of Taflove & Hagness's 2005 FDTD book
-            pml[ii].power_sigma = 3
-        else
-            temp = pml[ii].power_sigma
-            if temp < 0
-                throw(ArgumentError("$(direction)pml[$(ii)].power_sigma must be a non-negative scalar."))
-            end
-        end
-
-        # Conductivity at the end of the PML
-        if ~isdefined(pml[ii], :sigma_max_over_omega)
-            # Eq 7.67 of Taflove & Hagness's 2005 FDTD book
-            pml[ii].sigma_max_over_omega = 0.8*(pml[ii].power_sigma+1)/(k0dx*sqrt(epsilon_bg[ii])) 
-        else
-            temp = pml[ii].sigma_max_over_omega            
-            if temp < 0
-                throw(ArgumentError("$(direction)pml[$(ii)].sigma_max_over_omega must be a non-negative scalar."))
-            end
-        end
-
-        # Maximal coordinate stretching factor
-        if ~isdefined(pml[ii], :kappa_max)
-            # From Table 7.1 of Taflove & Hagness's 2005 FDTD book
-            pml[ii].kappa_max = 15
-        else
-            temp = pml[ii].kappa_max
-            if temp < 1
-                throw(ArgumentError("$(direction)pml[$ii].kappa_max must be a real scalar that equals or is larger than 1."))
-            end
-        end
-
-        # Power of polynomial grading for the coordinate stretching factor kappa
-        if ~isdefined(pml[ii], :power_kappa)
-            # From Table 7.1 of Taflove & Hagness's 2005 FDTD book
-            pml[ii].power_kappa = 3
-        else
-            temp = pml[ii].power_kappa
-            if temp < 0
-                throw(ArgumentError("$(direction)pml[$ii].power_kappa must be a non-negative scalar."))    
-            end
-        end
-
-        # Maximal alpha factor for complex frequency shifting (CFS)
-        if ~isdefined(pml[ii], :alpha_max_over_omega)
-            # CFS is meant to suppress reflection of low-frequency components for time-domain simulations; it is not necessary for frequency-domain simulations
-            pml[ii].alpha_max_over_omega = 0
-        else
-            temp = pml[ii].alpha_max_over_omega
-            if temp < 0
-                throw(ArgumentError("$(direction)pml[$ii].alpha_max_over_omega must be a non-negative scalar."))
-            end
-        end
-
-        # Power of polynomial grading for the alpha factor
-        if ~isdefined(pml[ii], :power_alpha)
-            # not relevant when alpha_max_over_omega = 0
-            pml[ii].power_alpha = 1
-        else
-            temp = pml[ii].power_alpha
-            if temp < 0
-                throw(ArgumentError("$(direction)pml[$ii].power_alpha must be a non-negative scalar."))   
-            end
-        end         
-
-    end
-    
-    return pml       
 end

@@ -44,7 +44,7 @@ build_epsilon_disorder(W, L, r_min, r_max, min_sep,
 
 ## Projecting field generated from a point source onto propagating channels through APF
 syst = Syst()
-pml_npixels = 15
+pml_npixels = 20
 syst.length_unit  = "lambda_0"
 syst.wavelength = 1
 syst.dx = dx
@@ -60,8 +60,7 @@ Bx.pos = [[m0_focus,l0_focus+pml_npixels+1,1,1]]
 Bx.data = [ones(1,1)]
 
 # put PML along z-direction
-pml = mesti_optimal_pml_params(syst.wavelength/syst.dx)
-pml.npixels = pml_npixels
+pml = PML(pml_npixels)
 pml.direction = "z"
 syst.PML = [pml]
 
@@ -97,7 +96,7 @@ syst.dx = dx
 syst.yBC = yBC
 syst.epsilon_low = epsilon_low
 syst.epsilon_high = epsilon_high
-syst.zPML = [pml]
+syst.zPML = [PML(pml_npixels)]
 
 # equivalent average epsilon for this disordered system
 epsilon_ave = mean(epsilon)

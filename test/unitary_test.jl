@@ -11,17 +11,14 @@ syst.epsilon_low = 1
 syst.epsilon_high = 1
 epsilon_max = 4
 epsilon_min = 1
+pml_npixels = 25
+syst.zPML = [PML(pml_npixels)]
 
 # Define the size of the scattering region (1 wavelength by 1 wavelength by 1 wavelength)
 nx, ny, nz = 2, 5, 2
 nx_Ex = nx; ny_Ex = ny; nz_Ex = nz -1
 nx_Ey = nx; ny_Ey = ny; nz_Ey = nz -1
 nx_Ez = nx; ny_Ez = ny; nz_Ez = nz
-
-# Use optimized PML parameters for this resolution to reduce error
-zpml = mesti_optimal_pml_params(syst.wavelength/syst.dx)
-zpml.npixels = 25
-syst.zPML = [zpml]
 
 # Specify inputs and output
 input = channel_type()

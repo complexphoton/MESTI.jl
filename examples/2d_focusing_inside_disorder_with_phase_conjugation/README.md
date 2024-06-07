@@ -46,7 +46,7 @@ build_epsilon_disorder(W, L, r_min, r_max, min_sep,
 
 ```julia
 syst = Syst()
-pml_npixels = 15
+pml_npixels = 20
 syst.length_unit  = "lambda_0"
 syst.wavelength = 1
 syst.dx = dx
@@ -62,8 +62,7 @@ Bx.pos = [[m0_focus,l0_focus+pml_npixels+1,1,1]]
 Bx.data = [ones(1,1)]
 
 # put PML along z-direction
-pml = mesti_optimal_pml_params(syst.wavelength/syst.dx)
-pml.npixels = pml_npixels
+pml = PML(pml_npixels)
 pml.direction = "z"
 syst.PML = [pml]
 
@@ -91,7 +90,7 @@ w, _ = mesti(syst, [Bx], [Cx])
 ```
 ```text:Output
 ===System size===
-ny_Ex = 5400; nz_Ex = 1381 for Ex(y,z)
+ny_Ex = 5400; nz_Ex = 1391 for Ex(y,z)
 UPML on -z +z sides; ; yBC = periodic; zBC = PEC
 Building B,C... elapsed time:   1.664 secs
 Building A  ... elapsed time:   8.106 secs
@@ -152,7 +151,7 @@ Ex, _, _ = mesti2s(syst, input, opts)
 ```
 ```text:Output
 ===System size===
-ny_Ex = 5400; nz_Ex = 1349 => 1381 for Ex(y,z)
+ny_Ex = 5400; nz_Ex = 1349 => 1391 for Ex(y,z)
 [N_prop_low, N_prop_high] = [725, 725] per polarization
 yBC = periodic; zBC = [PML, PML]
 Building B,C... elapsed time:   0.801 secs
@@ -268,5 +267,5 @@ display(intensity_plot)
 println("I_phase_congugation(y_0,z_0)/I_reg(y_0,z_0) = ", @sprintf("%d", round(abs.(Ex[m0_focus,opts.nz_low+l0_focus,2]).^2/abs.(Ex[m0_focus,opts.nz_low+l0_focus,1]).^2, digits=-2)))
 ```
 ```text:Output
-I_phase_congugation(y_0,z_0)/I_reg(y_0,z_0) = 1800
+I_phase_congugation(y_0,z_0)/I_reg(y_0,z_0) = 1700
 ```

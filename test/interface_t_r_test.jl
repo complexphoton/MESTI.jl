@@ -9,11 +9,8 @@ syst.yBC = "periodic" # 1D system at normal incidence has periodic boundary in y
 resolution = 10
 syst.wavelength = 1 # vacuum wavelength  
 syst.dx = 1/resolution # grid size
-
-# Use optimized PML parameters for this resolution to reduce error
-zpml = mesti_optimal_pml_params(syst.wavelength/syst.dx)
-zpml.npixels = 30
-syst.zPML = [zpml] 
+pml_npixels = 30
+syst.zPML = [PML(pml_npixels)] 
 k0dx = 2*pi/syst.wavelength*syst.dx # Dimensionless frequency k0*dx
 
 # Specify inputs and output

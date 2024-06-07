@@ -36,6 +36,8 @@ mutable struct Opts
     analysis_only::Integer    
     nthreads_OMP::Integer    
     iterative_refinement::Integer
+    use_L0_threads::Integer
+    write_LU_factor_to_disk::Integer
 
     exclude_PML_in_field_profiles::Integer
     return_field_profile::Integer
@@ -48,14 +50,11 @@ mutable struct Opts
     nz_low::Union{Integer, Nothing}
     nz_high::Union{Integer, Nothing}
 
-    # the following four are for block low-rank
+    # the following four are for MUMPS block low-rank
     use_BLR::Integer
     threshold_BLR::Real
     icntl_36::Integer
     icntl_38::Integer
-    
-    # this is only for MUMPS solver
-    parallel_dependency_graph::Integer
 
     Opts() = new()
 end
@@ -210,10 +209,19 @@ end
             opts.nthreads_OMP (positive integer scalar; optional):
                 Number of OpenMP threads used in MUMPS; overwrites the OMP_NUM_THREADS
                 environment variable.
-            opts.parallel_dependency_graph (logical scalar; optional, defaults to false):
-                If MUMPS is multithread, whether to use parallel dependency graph in MUMPS.
-                This typically improve the time performance, but marginally increase 
+            opts.use_L0_threads (logical scalar; optional, defaults to true):
+                If MUMPS is multithread, whether to use tree parallelism (so-called
+                L0-threads layer) in MUMPS. Please refer to Sec. 5.23 'Improved 
+                multithreading using tree parallelism' in MUMPS 5.7.1 Users' guide.
+                This typically enhances the time performance, but marginally increases
                 the memory usage.
+            opts.write_LU_factor_to_disk (logical scalar; optional, defaults to true):
+                An out-of-core (disk is used as an extension to main memory) facility 
+                is utilized to write the complete matrix of factors to disk in the 
+                factorization phase and read them in the solve phase. This can signiﬁcantly 
+                reduce the memory requirement while not increasing much the factorization time. 
+                The extra cost of the out-of-core feature is thus mainly during the solve phase, 
+                where factors have to be read from disk.
             opts.iterative_refinement (logical scalar; optional, defaults to false):
                 Whether to use iterative refinement in MUMPS to lower round-off
                 errors. Iterative refinement can only be used when opts.solver =
@@ -342,6 +350,13 @@ function mesti_matrix_solver!(matrices::Matrices, opts::Union{Opts,Nothing}=noth
         str_itr_ref = "with iterative refinement"
     end
 
+    # No iterative refinement by default; only used in factorize_and_solve with MUMPS
+    if ~isdefined(opts, :write_LU_factor_to_disk)
+        opts.write_LU_factor_to_disk = false
+    elseif ~isa(opts.write_LU_factor_to_disk, Bool)
+        throw(ArgumentError("opts.write_LU_factor_to_disk must be a boolean, if given."))
+    end
+
     # By default, if C is given and opts.iterative_refinement = false, then "APF" is used when opts.solver = "MUMPS", and "C*inv(U)*inv(L)*B" is used when opts.solver = "JULIA". Otherwise, "factorize_and_solve" is used.
     if ~isdefined(opts, :method) || isa(opts.method, Nothing)
         if return_X || opts.iterative_refinement
@@ -467,11 +482,11 @@ function mesti_matrix_solver!(matrices::Matrices, opts::Union{Opts,Nothing}=noth
             str_MUMPS_precision = " in double precision"
         end        
         
-        # We don't use KEEP(401) = 1 by default        
-        if ~isdefined(opts, :parallel_dependency_graph)
-            opts.parallel_dependency_graph = false
-        elseif ~isa(opts.parallel_dependency_graph, Bool)
-            throw(ArgumentError("opts.parallel_dependency_graph must be a boolean, if given."))    
+        # We use L0-threads by default        
+        if ~isdefined(opts, :use_L0_threads)
+            opts.use_L0_threads = true
+        elseif ~isa(opts.use_L0_threads, Bool)
+            throw(ArgumentError("opts.use_L0_threads must be a boolean, if given."))    
         end
 
         # We don't use BLR by default
@@ -554,6 +569,10 @@ function mesti_matrix_solver!(matrices::Matrices, opts::Union{Opts,Nothing}=noth
                 
         if isdefined(opts, :nthreads_OMP)
             @warn("opts.nthreads_OMP is only used when opts.solver = \"MUMPS\"; will be ignored.")
+        end
+
+        if isdefined(opts, :write_LU_factor_to_disk)
+            @warn("opts.write_LU_factor_to_disk is only used when opts.solver = \"MUMPS\"; will be ignored.")
         end
         
         if isdefined(opts, :use_BLR)
@@ -1008,10 +1027,12 @@ function MUMPS_analyze_and_factorize(A::Union{SparseMatrixCSC{Int64, Int64},Spar
     ## Analysis stage
     if opts.verbal; @printf("Analyzing   ... "); end
     t1 = time()
-    if opts.parallel_dependency_graph
-        # Split dependency graph and processed independently by OpenMP threads.
-        # This typically improve the time performance, but marginally increase the memory usage in full multithread.
-        set_keep!(id,401,1)
+    if opts.use_L0_threads
+        # Utilize L0-threads feature.
+        # This typically improves the time performance, but marginally increases the memory usage in full multithread.
+        set_icntl!(id,48,1;displaylevel=0)
+    else
+        set_icntl!(id,48,0;displaylevel=0)
     end
     set_job!(id,1) # what to do: analysis  
     if opts.use_given_ordering
@@ -1051,6 +1072,11 @@ function MUMPS_analyze_and_factorize(A::Union{SparseMatrixCSC{Int64, Int64},Spar
     ## Factorize stage
     t1 = time()
     set_job!(id,2) # what to do: factorize
+    if opts.write_LU_factor_to_disk
+        # Out-of-core factorization and solve phases
+        # The complete matrix of factors is written to disk
+        set_icntl!(id,22,1)
+    end
     invoke_mumps!(id) # run the factorization
     
     if id.infog[1] < 0 error("$(MUMPS_error_message(id.infog))") end # check for errors
