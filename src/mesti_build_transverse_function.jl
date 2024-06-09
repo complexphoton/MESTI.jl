@@ -1,5 +1,5 @@
 """
-    MESTI_BUILD_TRANSVERSE_FUNCTION_1D sets up 1D transverse function and wave number.
+    MESTI_BUILD_TRANSVERSE_FUNCTION sets up 1D transverse function and wave number.
 
         === Input Arguments ===
         nx (positive integer scalar; required):
@@ -44,7 +44,7 @@
             and are ordered from small to large. 
 
 """
-function mesti_build_transverse_function_1d(nx::Int, xBC::Union{String,Real}, n0::Real=0, offset::Bool=false)    
+function mesti_build_transverse_function(nx::Int, xBC::Union{String,Real}, n0::Real=0, offset::Bool=false)    
     # Check input parameters        
     if ~(nx>=0)
         throw(ArgumentError("Input argument nx must be a natural number."))
@@ -121,7 +121,7 @@ function mesti_build_transverse_function_1d(nx::Int, xBC::Union{String,Real}, n0
     return fun_u_1d, kxdx_all
 end
 """
-    MESTI_BUILD_TRANSVERSE_FUNCTION_1D_DERIVATIVE sets up derivative of a transverse function.
+    MESTI_BUILD_TRANSVERSE_FUNCTION_DERIVATIVE sets up derivative of a transverse function.
 
         === Input Arguments ===
         nx (positive integer scalar; required):
@@ -154,7 +154,7 @@ end
                 when the input is a vector, it returns a matrix where each column
                 is the respective derivative transverse profile. 
 """
-function mesti_build_transverse_function_1d_derivative(nx::Int, xBC::Union{String,Real}, n0::Real=0, changegrid::Real=0)    
+function mesti_build_transverse_function_derivative(nx::Int, xBC::Union{String,Real}, n0::Real=0, changegrid::Real=0)    
     # Check input parameters        
     if ~(nx>=0)
         error("Input argument nx must be a natural number.")

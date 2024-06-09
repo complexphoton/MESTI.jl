@@ -280,18 +280,18 @@ function mesti_build_channels(nx_Ex::Union{Int,Nothing}, nx_Ey::Union{Int,Nothin
     end
     
     if ~use_2D_TM
-        (channels.u_x_n, channels.kxdx_all) = mesti_build_transverse_function_1d(nx_Ex, BC_x_x, n0, true)
-        (channels.u_x_m, _)                 = mesti_build_transverse_function_1d(ny_Ex, BC_x_y, n0)
-        (channels.u_y_n, _)                 = mesti_build_transverse_function_1d(nx_Ey, BC_y_x, n0)    
-        (channels.u_y_m, channels.kydx_all) = mesti_build_transverse_function_1d(ny_Ey, BC_y_y, m0, true)
+        (channels.u_x_n, channels.kxdx_all) = mesti_build_transverse_function(nx_Ex, BC_x_x, n0, true)
+        (channels.u_x_m, _)                 = mesti_build_transverse_function(ny_Ex, BC_x_y, n0)
+        (channels.u_y_n, _)                 = mesti_build_transverse_function(nx_Ey, BC_y_x, n0)    
+        (channels.u_y_m, channels.kydx_all) = mesti_build_transverse_function(ny_Ey, BC_y_y, m0, true)
 
         channels.u_z_n = channels.u_y_n # u_z_n and u_y_n are same transverse function  
         channels.u_z_m = channels.u_x_m # u_z_m and u_x_m are same transverse function  
 
-        channels.du_z_n = mesti_build_transverse_function_1d_derivative(nx_Ey, BC_z_x, n0, 1)
-        channels.du_z_m = mesti_build_transverse_function_1d_derivative(ny_Ex, BC_z_y, m0, 1)
+        channels.du_z_n = mesti_build_transverse_function_derivative(nx_Ey, BC_z_x, n0, 1)
+        channels.du_z_m = mesti_build_transverse_function_derivative(ny_Ex, BC_z_y, m0, 1)
     else
-        (channels.u_x_m, channels.kydx_all) = mesti_build_transverse_function_1d(ny_Ex, BC_x_y, m0)
+        (channels.u_x_m, channels.kydx_all) = mesti_build_transverse_function(ny_Ex, BC_x_y, m0)
         channels.kxdx_all = nothing
     end
     

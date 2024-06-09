@@ -2,7 +2,7 @@ name = "MESTI"
 uuid = "8d7f31fa-9986-4e1d-8c81-72752476e54d"
 license = "GPL-3.0"
 authors = ["Ho-Chun Lin<hochunlin0508@gmail.com>, Shiyu Li<lishiyu@usc.edu>, Zeyu Wang<wangzeyu@usc.edu>, and Chia Wei Hsu<cwhsu@usc.edu>"]
-version = "0.4.3"
+version = "0.4.4"
 
 [deps]
 GeometryPrimitives = "17051e67-205e-509e-8301-03b320b998e6"

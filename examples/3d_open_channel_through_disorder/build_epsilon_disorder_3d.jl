@@ -4,7 +4,6 @@ function build_epsilon_disorder_3d(W_x, W_y, L, r_min, r_max, min_sep, number_de
     # Generate a random collection of cylinders and build the relative permittivity profile.
     # The full system spans y in [0, W_x], z in [0, L].
     # The scattering region spans [z1, z2], [y1, y2].
-    # Note that subpixel smoothing is not used.
     #   
     #   === Input Arguments ===
     #   W_x       = width of the full system
