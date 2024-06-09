@@ -2,7 +2,7 @@
 
 **MESTI** (<ins>M</ins>axwell's <ins>E</ins>quations <ins>S</ins>olver with <ins>T</ins>housands of <ins>I</ins>nputs) is an open-source software for full-wave electromagnetic simulations in frequency domain using finite-difference discretization on the [Yee lattice](https://meep.readthedocs.io/en/latest/Yee_Lattice).
 
-MESTI implements the **augmented partial factorization (APF)** method described in [this paper](https://doi.org/10.1038/s43588-022-00370-6). While conventional methods solve Maxwell's equations on every element of the discretization basis set (which contains much more information than is typically needed), APF bypasses such intermediate solution step and directly computes the projected quantities of interest: a generalized scattering matrix given any list of input source profiles and any list of output projection profiles. It can jointly handle thousands of inputs without a loop over them, using fewer computing resources than what a conventional direct method uses to handle a single input. It is exact with no approximation beyonddiscretization.
+MESTI implements the **augmented partial factorization (APF)** method described in [this paper](https://doi.org/10.1038/s43588-022-00370-6). While conventional methods solve Maxwell's equations on every element of the discretization basis set (which contains much more information than is typically needed), APF bypasses such intermediate solution step and directly computes the projected quantities of interest: a generalized scattering matrix given any list of input source profiles and any list of output projection profiles. It can jointly handle thousands of inputs without a loop over them, using fewer computing resources than what a conventional direct method uses to handle a single input. It is exact with no approximation beyond discretization.
 
 The MESTI.jl package here provides all the features in the 2D MATLAB version [MESTI.m](https://github.com/complexphoton/MESTI.m) and additionally supports 3D vectorial systems, anisotropic *ε*, MPI parallelization, both single-precision and double-precision arithmetics, and can perform subpixel smoothing for the geometric shapes handled by [GeometryPrimitives.jl](https://github.com/stevengj/GeometryPrimitives.jl). It is written in Julia.
 
@@ -20,7 +20,7 @@ $$
 
 where **b**(**r**) or *b*(*y*,*z*) is the source profile.
 
-MESTI.jl is a general-purpose solver with its interface written to provide maximal flexibility. It supports
+MESTI.jl is a general-purpose solver with an interface written to provide maximal flexibility. It supports
  - Full 3D vectorial systems.
  - TM polarization for 2D systems.
  - Any tensor or scalar relative permittivity profile $\bar{\bar{\varepsilon}}({\bf r})$, which can be real-valued or complex-valued.
@@ -66,7 +66,7 @@ export PATH=".../julia-1.9.3/bin/"
 
 where  <code>...</code> is the path to your Julia.
 
-Before installing MESTI.jl, the user first need to install the parallel version of the sparse linear solver [MUMPS](https://mumps-solver.org/index.php). Without MUMPS, MESTI.jl can still run but cannot use the APF method and will only use a conventional method with the built-in linear solver, which can be orders of magnitude slower and uses much more memory (especially in 3D and for large 2D systems). See this [MUMPS installation](./mumps) page for steps to install MUMPS. For this MESTI (v0.4.4) version, it is compatible with MUMPS versions between v5.3.3 and v5.6.2. It is not compatible with MUMPS versions v5.7.0 or v5.7.1. 
+Before installing MESTI.jl, the user first needs to install the parallel version of the sparse linear solver [MUMPS](https://mumps-solver.org/index.php). Without MUMPS, MESTI.jl can still run but cannot use the APF method and will only use a conventional method with the built-in linear solver, which can be orders of magnitude slower and uses much more memory (especially in 3D and for large 2D systems). See this [MUMPS installation](./mumps) page for steps to install MUMPS. For this MESTI (v0.4.4) version, it is compatible with MUMPS versions between v5.3.3 and v5.6.2. It is not compatible with MUMPS versions v5.7.0 or v5.7.1. 
 
 After the MUMPS installation, if you have a clean Julia environment (*i.e.* have not installed any Julia package before or have not installed new version of [Makie.jl](https://github.com/MakieOrg/Makie.jl)(v0.20 and v0.21) and [GeometryPrimitives.jl](https://github.com/stevengj/GeometryPrimitives.jl)(v0.5.0), you can install MESTI.jl (v0.4.4) by opening the command-line interface of Julia and typing:  
 
@@ -145,7 +145,7 @@ MESTI.jl can use both distributed memory parallelization across nodes/sockets th
 
 L0-threads (see the MUMPS Users' guide for details) in multithreading enhances the time performance, but marginally increases the memory usage. It is enabled by default when it is in 1D, 2D, or 2.5D ((width in *x*)*(width in *y*)/(thickness in *z*) $\geqslant 100$). In full 3D ((width in *x*)*(width in *y*)/(thickness in *z*) $< 100$), memory usage is critical and we do not use L0-threads by default. We can change from the default by setting the field `opts.use_L0_threads` in the input argument `opts`.
 
-In MUMPS, multithreading is more efficient than MPI, both in speed and in memory usage. So, we should maximize multhreading before using MPI. For example, if we use one node with a single socket having 8 cores (where the 8 cores sharing the same memory), we should use one MPI process (*i.e.*, no MPI) with 8 threads, instead of 8 MPI processes with one thread each. As another example, if we use 3 nodes, each node has 2 sockets, and each socket has 4 cores sharing the same memory of that socket (so, 24 cores in total), we should use 6 MPI processes (one per socket) with 4 threads per MPI process, instead of 24 MPI processes with one thread each.
+In MUMPS, multithreading is more efficient than MPI, both in speed and in memory usage. So, we should maximize multithreading before using MPI. For example, if we use one node with a single socket having 8 cores (where the 8 cores sharing the same memory), we should use one MPI process (*i.e.*, no MPI) with 8 threads, instead of 8 MPI processes with one thread each. As another example, if we use 3 nodes, each node has 2 sockets, and each socket has 4 cores sharing the same memory of that socket (so, 24 cores in total), we should use 6 MPI processes (one per socket) with 4 threads per MPI process, instead of 24 MPI processes with one thread each.
 
 The default number of threads is the number of cores available on the machine (either the number of physical cores, or the number of cores requested when running the job with a scheduler like Slurm on a cluster). Therefore, we only need to launch MESTI with the number of MPI processes equaling the total number of sockets.
 
