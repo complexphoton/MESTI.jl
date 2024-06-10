@@ -1,4 +1,4 @@
-# this file mirrors the "mumps_c_types.h" header file of MUMPS 5.2.2
+# this file mirrors the "mumps_c_types.h" header file of MUMPS 5.7.1
 
 const MUMPS_INT = Cint
 const MUMPS_INT8 = Int64
@@ -28,3 +28,5 @@ const MUMPS_ARITH_REAL = ( MUMPS_ARITH_s | MUMPS_ARITH_d )
 const MUMPS_ARITH_CMPLX = ( MUMPS_ARITH_c | MUMPS_ARITH_z )
 const MUMPS_ARITH_SINGLE = ( MUMPS_ARITH_s | MUMPS_ARITH_c )
 const MUMPS_ARITH_DBL = ( MUMPS_ARITH_d | MUMPS_ARITH_z )
+
+const MUMPS_OFF_T = MUMPS_INT8  

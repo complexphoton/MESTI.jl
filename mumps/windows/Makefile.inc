@@ -1,6 +1,6 @@
 #
-#  This file is part of MUMPS 5.6.2, released
-#  on Wed Oct 11 09:36:25 UTC 2023
+#  This file is part of MUMPS 5.7.1, released
+#  on Thu May  2 10:15:09 UTC 2024
 #
 ################################################################################
 #
@@ -55,7 +55,7 @@
 
 LPORDDIR = $(topdir)/PORD/lib/
 IPORD    = -I$(topdir)/PORD/include/
-LPORD    = -L$(LPORDDIR) -lpord
+LPORD    = -L$(LPORDDIR) -lpord$(PLAT)
 
 # The following is the path of the METIS by default installation.
 # You may need to modify the path based on your machine.
@@ -103,7 +103,7 @@ FPIC_OPT = -fPIC
 SONAME = -soname
 # Adapt/uncomment RPATH_OPT to avoid modifying
 # LD_LIBRARY_PATH in case of shared libraries
-RPATH_OPT = -Wl,-rpath,/home/usc/Downloads/MUMPS_5.6.2/lib/
+RPATH_OPT = -Wl,-rpath,/home/usc/Downloads/MUMPS_5.7.1/lib/
 OUTC    = -o 
 OUTF    = -o 
 # RM : remove files
@@ -151,7 +151,7 @@ SCALAP = -L$(MKLROOT)/lib/intel64 -lmkl_scalapack_lp64 -lmkl_blacs_intelmpi_lp64
 LIBPAR = $(SCALAP) $(LAPACK)
 
 INCSEQ = -I$(topdir)/libseq
-LIBSEQ  = $(LAPACK) -L$(topdir)/libseq -lmpiseq
+LIBSEQ  = $(LAPACK) -L$(topdir)/libseq -lmpiseq$(PLAT)
 
 # DEFINE HERE YOUR BLAS LIBRARY
 # BLAS library is under the folder of $(MKLROOT)/lib/intel64

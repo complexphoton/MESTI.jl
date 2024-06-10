@@ -1,6 +1,6 @@
 #
-#  This file is part of MUMPS 5.6.2, released
-#  on Wed Oct 11 09:36:25 UTC 2023
+#  This file is part of MUMPS 5.7.1, released
+#  on Thu May 2 10:15:09 UTC 2024
 #
 ################################################################################
 #
@@ -9,7 +9,7 @@
 #   This defines some parameters dependent on your platform; you should
 #   look for the approriate file in the directory ./Make.inc/ and copy it
 #   into a file called Makefile.inc. For example, from the MUMPS root
-#   directory, use
+#   directory, use 
 #   "cp Make.inc/Makefile.inc.generic ./Makefile.inc"
 #   (see the main README file for details)
 #

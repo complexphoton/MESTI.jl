@@ -1030,7 +1030,9 @@ function MUMPS_analyze_and_factorize(A::Union{SparseMatrixCSC{Int64, Int64},Spar
     if opts.use_L0_threads
         # Utilize L0-threads feature.
         # This typically improves the time performance, but marginally increases the memory usage in full multithread.
-        set_keep!(id,401,1)
+        set_icntl!(id,48,1;displaylevel=0)
+    else
+        set_icntl!(id,48,0;displaylevel=0)
     end
     set_job!(id,1) # what to do: analysis  
     if opts.use_given_ordering

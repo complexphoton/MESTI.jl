@@ -1,9 +1,9 @@
-# this file mirros the relevant content of the "[sdcz]mumps_c.h" file of MUMPS 5.3.3
+# this file mirros the relevant content of the "[sdcz]mumps_c.h" file of MUMPS 5.7.1
 # `gc_haven`, contains Julia references to protect the pointers passed to C
 # from gargage collection.
 export Mumps
 
-const MUMPS_VERSION = "5.6.2"
+const MUMPS_VERSION = "5.7.1"
 const MUMPS_VERSION_MAX_LEN = 30
 
 # mirror of structre in [sdcz]mumps_c.h
@@ -53,16 +53,26 @@ mutable struct Mumps{TC,TR}
     colsca_from_mumps::MUMPS_INT
     rowsca_from_mumps::MUMPS_INT
 
+    colsca_loc::Ptr{TR}
+    rowsca_loc::Ptr{TR}
+
+    rowind::Ptr{MUMPS_INT}
+    colind::Ptr{MUMPS_INT}
+    pivots::Ptr{TC}
+
     rhs::Ptr{TC}
     redrhs::Ptr{TC}
     rhs_sparse::Ptr{TC}
     sol_loc::Ptr{TC}
     rhs_loc::Ptr{TC}
+    rhsintr::Ptr{TC}
 
     irhs_sparse::Ptr{MUMPS_INT}
     irhs_ptr::Ptr{MUMPS_INT}
     isol_loc::Ptr{MUMPS_INT}
     irhs_loc::Ptr{MUMPS_INT}
+    glob2loc_rhs::Ptr{MUMPS_INT}
+    glob2loc_sol::Ptr{MUMPS_INT}
 
     nrhs::MUMPS_INT
     lrhs::MUMPS_INT
@@ -71,6 +81,7 @@ mutable struct Mumps{TC,TR}
     lsol_loc::MUMPS_INT
     nloc_rhs::MUMPS_INT
     lrhs_loc::MUMPS_INT
+    nsol_loc::MUMPS_INT
 
     schur_mloc::MUMPS_INT
     schur_nloc::MUMPS_INT
@@ -80,6 +91,7 @@ mutable struct Mumps{TC,TR}
     nblock::MUMPS_INT
     nprow::MUMPS_INT
     npcol::MUMPS_INT
+    ld_rhsintr::MUMPS_INT
 
     info::NTuple{80,MUMPS_INT}
     infog::NTuple{80,MUMPS_INT}
@@ -90,23 +102,26 @@ mutable struct Mumps{TC,TR}
     deficiency::MUMPS_INT
     pivnul_list::Ptr{MUMPS_INT}
     mapping::Ptr{MUMPS_INT}
+    singular_values::Ptr{TR}
+
 
     size_schur::MUMPS_INT
     listvar_schur::Ptr{MUMPS_INT}
     schur::Ptr{TC}
 
-    instance_number ::MUMPS_INT
     wk_user     ::Ptr{TC}
 
     version_number ::NTuple{MUMPS_VERSION_MAX_LEN+1+1,Cchar}
-    ooc_tmpdir     ::NTuple{256,Cchar}
-    ooc_prefix      ::NTuple{64,Cchar}
-    write_problem  ::NTuple{256,Cchar}
+    ooc_tmpdir     ::NTuple{1024,Cchar}
+    ooc_prefix      ::NTuple{256,Cchar}
+    write_problem  ::NTuple{1024,Cchar}
     lwk_user    ::MUMPS_INT
-    save_dir    ::NTuple{256,Cchar}
+    save_dir    ::NTuple{1024,Cchar}
     save_prefix ::NTuple{256,Cchar}
 
     metis_options::NTuple{40,MUMPS_INT}
+    
+    instance_number::MUMPS_INT
 
     _gc_haven::Array{Ref,1}
     _finalized::Bool

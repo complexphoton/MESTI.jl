@@ -41,9 +41,27 @@ MUMPS requires the ScaLAPACK, MPI and OpenMP libraries, which can be installed v
 brew install scalapack open-mpi llvm
 ```
 
- The <code>clang</code> compiler from Apple does not support OpenMP by default and we need to use the <code>clang</code> compiler from LLVM instead. After installing LLVM, enter
+ The <code>clang</code> compiler from Apple does not support OpenMP and we need to use the <code>clang</code> compiler from LLVM instead. After installing LLVM, enter
 
 ```
 export PATH=/opt/homebrew/opt/llvm/bin:$PATH
 ```
 to override the <code>clang</code> compiler from Apple.
+
+## Troubleshooting
+
+### Issue 1: "clang: error: unsupported option '-fopenmp'"
+This error occurs if you compile with the default <code>clang</code> compiler from Apple. Make sure you are using the <code>clang</code> compiler from LLVM by running the following command in terminal:
+```
+which clang
+```
+The output should be <code>/path/to/llvm/bin/clang</code>. If this is not the case, you need to override the <code>clang</code> compiler from Apple by running the following command in terminal:
+```
+export PATH=/opt/homebrew/opt/llvm/bin:$PATH
+```
+
+### Issue 2: The tests from MESTI.jl take a very long time to run
+The tests in <code>MESTI.jl/test</code> and <code>MESTI.jl/examples</code> should complete in a few seconds. If the test keeps running without outputting any errors, ensure that MPI.jl is configured properly by following those [steps](../README.md#Running-MUMPS-in-Julia).
+
+### Issue 3: "shmem: mmap: an error occurred while determining whether or not /var/folders/.../sm_segment.xxx could be created."
+If you are using OpenMPI v5.0.3 or later, you may encounter this error while using MESTI.jl. The code can still complete but segmentation fault or deadlock may occur in some [cases](https://github.com/open-mpi/ompi/issues/12307). If those issues occur, you can downgrade OpenMPI to v5.0.2
