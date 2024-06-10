@@ -191,12 +191,18 @@ end
                         Number of PML pixels.
                         Note this is within syst.epsilon_ij (i = x,y,z and j = x,y,z),
                         not in addition to.
-                    direction (string; optional): 
+                    direction (string; required): 
                         Direction(s) where PML is placed. Available choices are (case-insensitive):
                             "all" - (default) PML in x, y, and z directions for 3D and PML in y and z directions for 2D TM
                             "x"   - PML in x direction
                             "y"   - PML in y direction
-                            "z"   - PML in z direction    
+                            "z"   - PML in z direction
+                            "xy"  - PML in x and y directions
+                            "xz"  - PML in x and z directions
+                            "yz"  - PML in y and z directions
+                            "yx"  - PML in x and y directions
+                            "zx"  - PML in x and z directions
+                            "zy"  - PML in y and z directions
                     side (string; optional): 
                         Side(s) where PML is placed.Available choices are (case-insensitive):
                             "both" - (default) PML on both sides
@@ -845,8 +851,10 @@ function mesti(syst::Syst, B::Union{SparseMatrixCSC{Int64,Int64},SparseMatrixCSC
     end
     
     # Defaults to no PML anywhere
-    if ~isdefined(syst, :PML) 
-        syst.PML = [PML(0)]
+    if ~isdefined(syst, :PML)
+        pml = PML(0)
+        pml.direction = "all"
+        syst.PML = [pml]
     elseif isa(syst.PML, PML) 
         # If user specifies PML structure instead of vector of PML strcture, transform it to vector of PML strcture. 
         syst.PML = [syst.PML]
@@ -869,7 +877,7 @@ function mesti(syst::Syst, B::Union{SparseMatrixCSC{Int64,Int64},SparseMatrixCSC
         end
         
         # Number of PML pixels must be given
-        # Other fields are optional and will be checked in mesti_build_fdfd_matrix()
+        # Other PML parameters are optional and will be checked in mesti_build_fdfd_matrix()
         if ~isdefined(PML_ii, :npixels)
             throw(ArgumentError("syst.PML[$(ii)] must contain field \"npixels\"."))
         end
@@ -878,11 +886,11 @@ function mesti(syst::Syst, B::Union{SparseMatrixCSC{Int64,Int64},SparseMatrixCSC
             use_PML = true
         end
                 
-        # If PML is specified, we put it on both x, y, and z directions by default for 3D, and both y and z directions by default for 2D
+        # Direction(s) where PML is placed must be given
         if ~isdefined(PML_ii, :direction)
-            PML_ii.direction = "all"
-        elseif ~(lowercase(PML_ii.direction) in ["all", "x", "y", "z"])
-            throw(ArgumentError("syst.PML[$(ii)].direction = \"$(PML_ii.direction)\" is not a supported option; use \"all\", \"x\", \"y\", or \"z\".")) 
+            throw(ArgumentError("syst.PML[$(ii)] must contain field \"direction\"."))
+        elseif ~(lowercase(PML_ii.direction) in ["all", "x", "y", "z", "xy", "xz", "yz", "yx", "zx", "zy"])
+            throw(ArgumentError("syst.PML[$(ii)].direction = \"$(PML_ii.direction)\" is not a supported option; use \"all\", \"x\", \"y\", \"z\", \"xy\", \"xz\", \"yz\", \"yx\", \"zx\", or \"zy\".")) 
         end
 
         # If PML is specified, we put it on both sides by default
@@ -918,6 +926,9 @@ function mesti(syst::Syst, B::Union{SparseMatrixCSC{Int64,Int64},SparseMatrixCSC
                 end
             end
         elseif lowercase(PML_ii.direction) == "x"
+            if use_2D_TM
+                @warn "syst.PML[$(ii)].direction = \"x\" would not apply to 2D cases; will be ignored."                
+            end
             if lowercase(PML_ii.side) == "both" # low & high
                 ind_ii = [1,2]
             elseif PML_ii.side == "-"
@@ -933,16 +944,45 @@ function mesti(syst::Syst, B::Union{SparseMatrixCSC{Int64,Int64},SparseMatrixCSC
             else # PML_ii.side = "+"
                 ind_ii = 4
             end                                    
-        else # PML_ii.direction == "z"
+        elseif lowercase(PML_ii.direction) == "z"
             if lowercase(PML_ii.side) == "both" # low & high
                 ind_ii = [5,6]
             elseif lowercase(PML_ii.side) == "-"
                 ind_ii = 5
             else # PML_ii.side = "+"
                 ind_ii = 6
-            end                                                            
-        end
-                                                          
+            end
+        elseif lowercase(PML_ii.direction) == "xy" || lowercase(PML_ii.direction) == "yx"
+            if use_2D_TM
+                @warn "syst.PML[$(ii)].direction = \"$(PML_ii.side)\"; in 2D cases, PML in x-direction will not be applied and ignored."                
+            end            
+            if lowercase(PML_ii.side) == "both" # low & high
+                ind_ii = [1,2,3,4]
+            elseif lowercase(PML_ii.side) == "-"
+                ind_ii = [1,3]
+            else # PML_ii.side = "+"
+                ind_ii = [2,4]
+            end            
+        elseif lowercase(PML_ii.direction) == "xz" || lowercase(PML_ii.direction) == "zx"
+            if use_2D_TM
+                @warn "syst.PML[$(ii)].direction = \"$(PML_ii.side)\"; in 2D cases, PML in x-direction will not be applied and ignored."                
+            end            
+            if lowercase(PML_ii.side) == "both" # low & high
+                ind_ii = [1,2,5,6]
+            elseif lowercase(PML_ii.side) == "-"
+                ind_ii = [1,5]
+            else # PML_ii.side = "+"
+                ind_ii = [2,6]
+            end            
+        else # lowercase(PML_ii.direction) == "yz" || lowercase(PML_ii.direction) == "zy"
+            if lowercase(PML_ii.side) == "both" # low & high
+                ind_ii = [3,4,5,6]
+            elseif lowercase(PML_ii.side) == "-"
+                ind_ii = [3,5]
+            else # PML_ii.side = "+"
+                ind_ii = [4,6]
+            end            
+        end                              
         # Specify PML at those locations
         for jj = 1:length(ind_ii)
             ind_side = ind_ii[jj]

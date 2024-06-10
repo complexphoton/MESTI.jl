@@ -560,7 +560,7 @@ end
           Boundary condition in z direction, analogous to yBC.    
        yPML (a two-element PML vector; optional):
           Parameters for perfectly matched layer (PML) in y direction.
-          xPML = [PML_left, PML_right] 
+          yPML = [PML_left, PML_right] 
           If users do not want to put PML on either side, just set the field "npixels" = 0.
           For example, PML_left.npixels = 0: no PML on the left.
           In each case, PML is a PML structure with the following fields:

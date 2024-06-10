@@ -787,7 +787,7 @@ function mesti2s(syst::Syst, input::Union{channel_type, channel_index, wavefront
     
     if ~(length(syst.zPML)==2) && two_sided
         if isdefined(syst.zPML, :side) && syst.zPML.side != "both"
-            throw(ArgumentError("syst.zPML.direction should be assigned as \"both\", if given, when the user just provided only one PML object is provided for a two-sided geometry."))
+            throw(ArgumentError("syst.zPML.side should be assigned as \"both\", if given, when the user just provided only one PML object is provided for a two-sided geometry."))
         end
         # Apply the same zPML on both sides    
         syst.zPML = [deepcopy(syst.zPML[1]), deepcopy(syst.zPML[1])]

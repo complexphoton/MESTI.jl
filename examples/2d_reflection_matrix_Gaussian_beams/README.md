@@ -195,7 +195,9 @@ C = "transpose(B)";
 The scattering matrix is given by S = C\*inv(A)\*B - D, with D = C\*inv(A<sub>0</sub>)\*B - S<sub>0</sub> where A<sub>0</sub> is a reference system for which its scattering matrix S<sub>0</sub> is known. We consider A<sub>0</sub> to be a homogeneous space with no scatterers, for which the reflection matrix S<sub>0</sub> is zero.
 
 ```julia
-syst.PML = [PML(pml_npixels)] # Put PML on all four sides
+pml = PML(pml_npixels)
+pml.direction = "all"
+syst.PML = [pml]  # PML on all four sides
 
 # For a homogeneous space, the length of the simulation domain doesn't
 # matter, so we choose a minimal thickness of nz_Ex_temp = n_source + pml_npixels

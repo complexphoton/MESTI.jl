@@ -213,7 +213,9 @@ C = "transpose(B)"
 # scattering matrix S_0 is known. We consider A_0 to be a homogeneous space
 # with no scatterers, for which the reflection matrix S_0 is zero.
 
-syst.PML = [PML(pml_npixels)] # Put PML on all four sides
+pml = PML(pml_npixels)
+pml.direction = "all"
+syst.PML = [pml]  # PML on all four sides
 
 # For a homogeneous space, the length of the simulation domain doesn't
 # matter, so we choose a minimal thickness of nz_Ex_temp = n_source + pml_npixels

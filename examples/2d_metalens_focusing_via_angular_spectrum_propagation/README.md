@@ -111,7 +111,9 @@ syst = Syst()
 syst.epsilon_xx = epsilon_syst
 syst.wavelength = wavelength
 syst.dx = dx
-syst.PML = [PML(nPML)]  # Number of PML pixels (on all four sides)
+pml = PML(nPML)
+pml.direction = "all"
+syst.PML = [pml]  # PML on all four sides
 
 # In mesti(), B_struct.pos = [m1, n1, h, w] specifies the position of a
 # block source, where (m1, n1) is the index of the smaller-(y,z) corner,
