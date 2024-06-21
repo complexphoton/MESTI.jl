@@ -174,7 +174,7 @@ function mesti_setup_longitudinal(k0dx::Union{Real,Complex}, epsilon_bg::Union{R
     else
         # Permutation that switches one propagating channel with one having a complex-conjugated transverse profile.
         if isa(kLambda_y, Nothing)
-            # For Dirichlet and Neumann boundaries, u_x_m is real, so no permutation needed
+            # For Dirichlet and Neumann boundaries, f_x_m is real, so no permutation needed
             side.ind_prop_conj = 1:side.N_prop
         elseif kLambda_y == 0
             # For periodic boundary condition, complex conjugation switches ky and -ky

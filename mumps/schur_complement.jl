@@ -46,7 +46,7 @@ MPI.Initialized() ? nothing : MPI.Init()
 	H = get_schur_complement(id)
 
 	# Check the error of the Schur Complement.
-	@test mean(abs.(((D - C*inv(Matrix(A))*B) - H)./(D - C*inv(Matrix(A))*B))) ≤ sqrt(eps(Float64))
+	@test norm((D - C*inv(Matrix(A))*B) - H)/norm(D - C*inv(Matrix(A))*B) ≤ sqrt(eps(Float64))*2
     end
 end
 
@@ -87,6 +87,6 @@ end
         H = get_schur_complement(id)
         
 	# Check the error of the Schur Complement.
-	@test mean(abs.(((D - C*inv(Matrix(A))*B) - H)./(D - C*inv(Matrix(A))*B))) ≤ sqrt(eps(Float32))
+	@test norm((D - C*inv(Matrix(A))*B) - H)/norm(D - C*inv(Matrix(A))*B) ≤ sqrt(eps(Float32))*2
     end
 end

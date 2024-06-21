@@ -72,9 +72,9 @@ N_prop_low = channels_low.N_prop # number of propagating channels on the low sid
 Cx = Source_struct()
 ny_Ex = Int(W/dx)
 Cx.pos = [[1,pml_npixels+1,ny_Ex,1]]
-# sqrt(nu)*conj(u_Ex(m)) serves as a projection profile for a propagating channel, where nu = sin(kzdx)
+# sqrt(nu)*conj(f_x(m)) serves as a projection profile for a propagating channel, where nu = sin(kzdx)
 # here we project the result onto all propagating channels as a output basis 
-C_low = (conj(channels_low.u_x_m(channels_low.kydx_prop))).*reshape(channels_low.sqrt_nu_prop,1,:).*reshape(exp.((-1im*0.5)*channels_low.kzdx_prop),1,:) # 0.5 pixel backpropagation indicates that the projection(detect) region is half a pixel away from z = 0
+C_low = (conj(channels_low.f_x_m(channels_low.kydx_prop))).*reshape(channels_low.sqrt_nu_prop,1,:).*reshape(exp.((-1im*0.5)*channels_low.kzdx_prop),1,:) # 0.5 pixel backpropagation indicates that the projection(detect) region is half a pixel away from z = 0
 Cx.data = [C_low]
 
 # Calculate output channel amplitude coefficients (w) for the propagating channels from the point source through APF

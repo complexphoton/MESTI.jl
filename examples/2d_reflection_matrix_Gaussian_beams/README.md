@@ -88,13 +88,13 @@ channels = mesti_build_channels(ny_Ex, "PEC", (2*pi/syst.wavelength)*syst.dx, n_
 
 # Transverse profiles of the propagating channels. Each column of u is
 # one transverse profile. Different columns are orthonormal.
-u = channels.u_x_m(channels.kydx_prop) # size(u) = [ny_Ex, N_prop]
+f_transverse = channels.f_x_m(channels.kydx_prop) # size(f_transverse) = [ny_Ex, N_prop]
 
 # Step 2: Project E_yf(y, z_f) onto the propagating channels and obtain v_f.
 # sqrt_nu_prop is the square root of nu for the propagating channel.
 sqrt_nu_prop = reshape(channels.sqrt_nu_prop, :, 1)
 # amplitude coefficients at z = z_f
-v_f =  (sqrt_nu_prop.* u')*E_yf # size(v_f) = [N_prop, M_in]
+v_f =  (sqrt_nu_prop.* adjoint(f_transverse))*E_yf # size(v_f) = [N_prop, M_in]
 
 # Step 3: Back propagate from z = z_f to z = z_s.
 # This step assumes a PEC boundary in y, so it is not exact with PML in y,
@@ -106,11 +106,11 @@ v_s = exp.(1im*kz*(z_s-z_f)).*v_f # size(v_s) = [N_prop, M_in]
 
 # Step 4: Determine the line sources.
 # In a closed geometry with no PML in y, a line source of
-# -2i*sqrt(nu[a])*u[:,a] generates outgoing waves with transverse profile
-# u[:,a]/sqrt(nu[a]). With PML in y, this is not strictly true but is sufficiently
-# accurate since E_yf(y,z=z_source) decays exponentially in y.
+# -2i*sqrt(nu[a])*f_transverse[:,a] generates outgoing waves with transverse profile
+# f_transverse[:,a]/sqrt(nu[a]). With PML in y, this is not strictly true but is sufficiently
+# accurate since E_yf(y,z=z_s) decays exponentially in y.
 # Note we use implicit expansion here.
-B_low = (u.*transpose(channels.sqrt_nu_prop))*v_s # size(B_low) = [ny_Ex, M_in]
+B_low = (f_transverse.*transpose(channels.sqrt_nu_prop))*v_s # size(B_low) = [ny_Ex, M_in]
 
 # We take the -2i prefactor out, to be multiplied at the end. The reason
 # will be clear when we handle C below.
@@ -142,7 +142,7 @@ heatmap(1:M_in, collect(y), abs.(B_low),
 
 # Build the output projections
 
-We consider output projections onto the same set of Gaussian beams *$\Psi$*<sub>yf</sub>(*y*,*z*<sub>f</sub>) = exp(-(*y* - *y*<sub>f</sub>)<sup>2</sup>/*w*<sup>2</sup>) focused at (*y*<sub>f</sub>, *z*<sub>f</sub>),with the projection done at the detection plane (*z* = *z*<sub>d</sub>) same as the source plane (*z* = *z*<sub>d</sub>).
+We consider output projections onto the same set of Gaussian beams *$\Psi$*<sub>yf</sub>(*y*,*z*<sub>f</sub>) = exp(-(*y* - *y*<sub>f</sub>)<sup>2</sup>/*w*<sup>2</sup>) focused at (*y*<sub>f</sub>, *z*<sub>f</sub>),with the projection done at the detection plane (*z* = *z*<sub>d</sub>) same as the source plane (*z* = *z*<sub>s</sub>).
 
 When the system has a closed boundary in y, as is the case in mesti2s(), the set of transverse modes form a complete and orthonormal basis, so it is clear what the output projection should be. But the Gaussian beams here are not orthogonal to each other, are not normalized, and do not form a complete basis. So, it is not obvious how our output projection should be defined in the detection plane.
 
@@ -160,16 +160,16 @@ Psi_yf = exp.(-(y .- transpose(y_f)).^2/(w_0^2))
 # Step 1: projecting Psi_yf onto the propagating channels and obtaining 
 # amplitude coefficients v_f_tilde 
 # size(v_f_tilde) = [num_of_prop_channel, num_of_Gaussian_output]
-v_f_tilde = (sqrt_nu_prop.*adjoint(u))*Psi_yf
+v_f_tilde = (sqrt_nu_prop.*adjoint(f_transverse))*Psi_yf
 # Step 2: propagating the amplitude coefficient from plane z = z_f to plane z = z_d
 # size(v_d) = [num_of_prop_channel, num_of_Gaussian_output]
 v_d = exp.(1im*(-kz)*(z_d-z_f)).*v_f_tilde
 
 # Step 3: Reconstruct Psi_yf at the detection plane z = z_d
-# Psi_yd_zd = (u./transpose(sqrt_nu_prop))*v_d
+# Psi_yd_zd = (f_transverse./transpose(sqrt_nu_prop))*v_d
 
 # Step 4: We obtain the projection profile based on Psi_yd and v_d.
-C_low = adjoint(v_d)*(sqrt_nu_prop.*adjoint(u))
+C_low = adjoint(v_d)*(sqrt_nu_prop.*adjoint(f_transverse))
 
 # Normally, the next step would be
 # C_struct.data = C_low.';

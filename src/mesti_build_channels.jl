@@ -10,14 +10,14 @@ abstract type Channels end
 mutable struct Channels_two_sided <: Channels
     # A composite data type to store the items on two sides, transverse functions, and wave vectors
     # See also: mesti_build_channels
-    u_x_n::Function
-    u_y_n::Function
-    u_z_n::Function
-    du_z_n::Function  
-    u_x_m::Function
-    u_y_m::Function
-    u_z_m::Function
-    du_z_m::Function
+    f_x_n::Function
+    f_y_n::Function
+    f_z_n::Function
+    df_z_n::Function  
+    f_x_m::Function
+    f_y_m::Function
+    f_z_m::Function
+    df_z_m::Function
     kxdx_all::Union{Vector{Float64},Nothing}
     kydx_all::Vector{Float64}
     low::Side
@@ -28,14 +28,14 @@ end
 mutable struct Channels_one_sided <: Channels
     # A composite data type to store the items on one side, transverse functions, and wave vectors
     # See also: mesti_build_channels        
-    u_x_n::Function
-    u_y_n::Function
-    u_z_n::Function
-    du_z_n::Function      
-    u_x_m::Function
-    u_y_m::Function
-    u_z_m::Function
-    du_z_m::Function    
+    f_x_n::Function
+    f_y_n::Function
+    f_z_n::Function
+    df_z_n::Function      
+    f_x_m::Function
+    f_y_m::Function
+    f_z_m::Function
+    df_z_m::Function    
     kxdx_all::Union{Vector{Float64},Nothing}
     kydx_all::Vector{Float64}
     N_prop::Integer
@@ -75,7 +75,7 @@ end
                 "PECPMC"   - PEC on low side and PMC on high side
                 "PMCPEC"   - PMC on low side and PEC on high side
             When xBC is a scalar number, the Bloch periodic boundary condition is
-            used with f(m+ny) = f(m)*exp(1i*xBC); in other words, xBC = kx_B*nx_Ex*dx =
+            used with p(m+ny) = p(m)*exp(1i*xBC); in other words, xBC = kx_B*nx_Ex*dx =
             kx_B*nx_Ey*dx = kx_B*p where ky_B is the Bloch wave number and p = nx*dx is the
             periodicity in x. 
         ny_Ex (positive integer scalar; required in 3D):
@@ -97,7 +97,7 @@ end
             the finite-difference dispersion is used. 
         n0 (real numeric scalar, optional, defaults to 0):
             Center of the 1D transverse mode profile along x-direction with periodic or Bloch periodic
-            boundary condition (nx = nx_Ex = nx_Ey), u_{n,a} = exp(i*kx(a)*dx*(n-n0))/sqrt(nx_Ex), 
+            boundary condition (nx = nx_Ex = nx_Ey), f_{n,a} = exp(i*kx(a)*dx*(n-n0))/sqrt(nx_Ex), 
             where kx(a) = kx_B + a*(2*pi/nx*dx).
         m0 (real numeric scalar, optional, defaults to 0):
             Center of the 1D transverse mode profile along x-direction with periodic or Bloch periodic
@@ -113,21 +113,21 @@ end
                 Dimensionless transverse wave number ky*dx for all ny channels,
                 including both propagating and evanescent ones. They are real-valued
                 and are ordered from small to large. 
-            channels.u_x_n (function):
+            channels.f_x_n (function):
                 A 1D transverse function along x-direction for Ex 
-            channels.u_y_n (function):
+            channels.f_y_n (function):
                 A 1D transverse function along x-direction for Ey 
-            channels.u_z_n (function):
+            channels.f_z_n (function):
                 A 1D transverse function along x-direction for Ez 
-            channels.du_z_n (function):
+            channels.df_z_n (function):
                 A derivative of 1D transverse function along x-direction for Ez 
-            channels.u_x_m (function):
+            channels.f_x_m (function):
                 A 1D transverse function along y-direction for Ex 
-            channels.u_y_m (function):
+            channels.f_y_m (function):
                 A 1D transverse function along y-direction for Ey 
-            channels.u_z_m (function):
+            channels.f_z_m (function):
                 A 1D transverse function along y-direction for Ez 
-            channels.du_z_m (function):
+            channels.df_z_m (function):
                 A derivative of 1D transverse function along y-direction for Ez 
             channels.low (scalar structure):
                 When epsilon_low and epsilon_high are both given (i.e., epsilon_high is given
@@ -244,7 +244,7 @@ function mesti_build_channels(nx_Ex::Union{Int,Nothing}, nx_Ey::Union{Int,Nothin
         if isa(xBC, Number)
             kLambda_x = xBC
             xBC = "Bloch"
-            # kLambda_x must be real for u_x_n(kxdx_x) and u_y_n(kxdx_y) to be unitary
+            # kLambda_x must be real for f_x_n(kxdx_x) and f_y_n(kxdx_y) to be unitary
             if ~isa(kLambda_x, Real)
                 @warn("kx_B*Lambda_x = $(real(kLambda_x)) + 1im*$(imag(kLambda_x)) is a complex number; must be real for a complete orthonormal transverse basis.")
             end
@@ -259,7 +259,7 @@ function mesti_build_channels(nx_Ex::Union{Int,Nothing}, nx_Ey::Union{Int,Nothin
     if isa(yBC, Number)
         kLambda_y = yBC
         yBC = "Bloch"
-        # kLambda_y must be real for u_x_m(kydx_x) and u_y_m(kydx_y) to be unitary
+        # kLambda_y must be real for f_x_m(kydx_x) and f_y_m(kydx_y) to be unitary
         if ~isa(kLambda_y, Real)
             @warn("ky_B*Lambda_y = $(real(kLambda_y)) + 1im*$(imag(kLambda_y)) is a complex number; must be real for a complete orthonormal transverse basis.")
         end
@@ -270,7 +270,7 @@ function mesti_build_channels(nx_Ex::Union{Int,Nothing}, nx_Ey::Union{Int,Nothin
         yBC = "Bloch"
     end
 
-    # f = [f(1), ..., f(nx)].'
+    # p = [p(1), ..., p(nx)].'
     # For periodic and Bloch periodic boundary, we order channels.kxdx_all (channels.kydx_all) such that it increases monotonically from negative to positive
     # For other boundary conditions, kx >= 0 (ky >= 0), and we order channels.kxdx_all (channels.kydx_all) such that it increases monotonically from smallest to largest
     if two_sided
@@ -280,18 +280,18 @@ function mesti_build_channels(nx_Ex::Union{Int,Nothing}, nx_Ey::Union{Int,Nothin
     end
     
     if ~use_2D_TM
-        (channels.u_x_n, channels.kxdx_all) = mesti_build_transverse_function(nx_Ex, BC_x_x, n0, true)
-        (channels.u_x_m, _)                 = mesti_build_transverse_function(ny_Ex, BC_x_y, n0)
-        (channels.u_y_n, _)                 = mesti_build_transverse_function(nx_Ey, BC_y_x, n0)    
-        (channels.u_y_m, channels.kydx_all) = mesti_build_transverse_function(ny_Ey, BC_y_y, m0, true)
+        (channels.f_x_n, channels.kxdx_all) = mesti_build_transverse_function(nx_Ex, BC_x_x, n0, true)
+        (channels.f_x_m, _)                 = mesti_build_transverse_function(ny_Ex, BC_x_y, n0)
+        (channels.f_y_n, _)                 = mesti_build_transverse_function(nx_Ey, BC_y_x, n0)    
+        (channels.f_y_m, channels.kydx_all) = mesti_build_transverse_function(ny_Ey, BC_y_y, m0, true)
 
-        channels.u_z_n = channels.u_y_n # u_z_n and u_y_n are same transverse function  
-        channels.u_z_m = channels.u_x_m # u_z_m and u_x_m are same transverse function  
+        channels.f_z_n = channels.f_y_n # f_z_n and f_y_n are same transverse function  
+        channels.f_z_m = channels.f_x_m # f_z_m and f_x_m are same transverse function  
 
-        channels.du_z_n = mesti_build_transverse_function_derivative(nx_Ey, BC_z_x, n0, 1)
-        channels.du_z_m = mesti_build_transverse_function_derivative(ny_Ex, BC_z_y, m0, 1)
+        channels.df_z_n = mesti_build_transverse_function_derivative(nx_Ey, BC_z_x, n0, 1)
+        channels.df_z_m = mesti_build_transverse_function_derivative(ny_Ex, BC_z_y, m0, 1)
     else
-        (channels.u_x_m, channels.kydx_all) = mesti_build_transverse_function(ny_Ex, BC_x_y, m0)
+        (channels.f_x_m, channels.kydx_all) = mesti_build_transverse_function(ny_Ex, BC_x_y, m0)
         channels.kxdx_all = nothing
     end
     

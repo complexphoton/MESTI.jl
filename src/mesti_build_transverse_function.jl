@@ -7,13 +7,13 @@
         xBC (string or scalar number; required):
             Boundary condition in the transverse direction. 
             When xBC is a character vector, available choices are (case-insensitive): 
-                "periodic"              - f(n+nx) = f(n) 
-                "Dirichlet"             - f(0) = f(nx+1,n) = 0 
-                "Neumann"               - f(0) = f(1); f(nx+1) = f(nx) 
-                "DirichletNeumann"      - f(0) = 0; f(nx+1) = f(nx) 
-                "NeumannDirichlet"      - f(0) = f(1); f(nx+1) = 0 
+                "periodic"              - p(n+nx) = p(n) 
+                "Dirichlet"             - p(0) = p(nx+1,n) = 0 
+                "Neumann"               - p(0) = p(1); p(nx+1) = p(nx) 
+                "DirichletNeumann"      - p(0) = 0; p(nx+1) = p(nx) 
+                "NeumannDirichlet"      - p(0) = p(1); p(nx+1) = 0 
             When xBC is a scalar number, the Bloch periodic boundary condition is
-            used with f(n+nx) = f(n)*exp(1i*xBC); in other words, xBC = kx_B*nx*dx =
+            used with p(n+nx) = p(n)*exp(1i*xBC); in other words, xBC = kx_B*nx*dx =
             kx_B*p where kx_B is the Bloch wave number and p = nx*dx is the
             periodicity in the transverse direction. 
         n0 (real numeric scalar, optional, defaults to 0):
@@ -27,13 +27,13 @@
             already included the offset in other BCs.
 
         === Output Arguments ===
-        fun_u_1d (function):
+        fun_f_1d (function):
             A function that, given one element of kxdx_all as the input, 
             returns its normalized transverse field profile as an nx vector;
             when the input is a vector, it returns a matrix where each column
             is the respective transverse profile. The transverse modes form a
             complete and orthonormal set, so the nx-by-nx matrix
-            fun_u_1d(kxdx_all) is unitary for periodic (Bloch), Neumann, 
+            fun_f_1d(kxdx_all) is unitary for periodic (Bloch), Neumann, 
             DirichletNeumann, and NeumannDirichlet, but it is not the case for Dirichlet.
             For Dirichlet, we intend to maintain the trivial solution in this transverse function,
             since it would give us non-trivial solution in another component when we build up 
@@ -66,12 +66,12 @@ function mesti_build_transverse_function(nx::Int, xBC::Union{String,Real}, n0::R
         xBC = "Bloch"
     end
 
-    # f = [f(1), ..., f(nx)].'
+    # f = [p(1), ..., p(nx)].'
     # For periodic and Bloch periodic boundary, we order kxdx_all such that it increases monotonically from negative to positive
     # For other boundary conditions, kx >= 0, and we order kxdx_all such that it increases monotonically from smallest to largest
     # Transverse modes in x (form a complete basis in x)
     if xBC == "Bloch"
-        # f(nx+1) = f(1)*exp(1i*ka_x); f(0) = f(nx)*exp(-1i*ka_x)
+        # p(nx+1) = p(1)*exp(1i*ka_x); p(0) = p(nx)*exp(-1i*ka_x)
         # The transverse mode index where kxdx = ka_x/nx
         if mod(nx,2) == 1
             ind_zero_kx = round((nx+1)/2)
@@ -80,26 +80,26 @@ function mesti_build_transverse_function(nx::Int, xBC::Union{String,Real}, n0::R
         end
         kxdx_all = (ka_x/nx) .+ ((1:nx).-ind_zero_kx)*(2*pi/nx) 
     elseif xBC == "Dirichlet"
-        # f(0) = f(nx+1) = 0
+        # p(0) = p(nx+1) = 0
         # Note that here kxdx_all starts from 0
         # Even it gives us trivial solution in this transverse function,
         # but this kxdx = 0 would give us non-trivial solution in another component. 
         kxdx_all = (0:nx)*(pi/(nx+1))        
     elseif xBC == "Neumann"
-        # f(0) = f(1), f(nx+1) = f(nx)
+        # p(0) = p(1), p(nx+1) = p(nx)
         kxdx_all = ((1:nx).-1)*(pi/(nx))        
     elseif xBC == "DirichletNeumann"
-        # f(0) = 0, f(nx+1) = f(nx)
+        # p(0) = 0, p(nx+1) = p(nx)
         kxdx_all = ((0.5:nx))*(pi/(nx+0.5))                
     elseif xBC == "NeumannDirichlet"
-        # f(0) = f(1), f(ny+1) = 0
+        # p(0) = p(1), p(ny+1) = 0
         kxdx_all = ((0.5:nx))*(pi/(nx+0.5))                        
     else
         error("Input argument xBC = $(xBC) is not a supported option.")        
     end
 
     # Build up the tranverse function with n = 1...nx   
-    fun_u_1d(kxdx) =  if xBC == "Bloch"
+    fun_f_1d(kxdx) =  if xBC == "Bloch"
                             # Dimensionless transverse mode profile: u_{n,a} = exp(1im*(n-n0)*kxdx(a))/sqrt(nx)
                             exp.(((1:nx).+0.5*(offset).-n0)*(1im*reshape(vcat(kxdx),1,:)))/sqrt(nx)
                       elseif xBC == "Dirichlet"
@@ -118,7 +118,7 @@ function mesti_build_transverse_function(nx::Int, xBC::Union{String,Real}, n0::R
                             # Dimensionless transverse mode profile: u_{n,a} = cos((n-0.5)*kxdx(a))*sqrt(2/(nx+0.5))        
                             cos.(((0.5:nx))*reshape(vcat(kxdx),1,:))*sqrt(2/(nx+0.5)) 
                       end 
-    return fun_u_1d, kxdx_all
+    return fun_f_1d, kxdx_all
 end
 """
     MESTI_BUILD_TRANSVERSE_FUNCTION_DERIVATIVE sets up derivative of a transverse function.
@@ -129,13 +129,13 @@ end
         xBC (string or scalar number; required):
             Boundary condition in the transverse direction. 
             When xBC is a character vector, available choices are (case-insensitive): 
-                "periodic"              - f(n+nx) = f(n) 
-                "Dirichlet"             - f(0) = f(nx+1,n) = 0 
-                "Neumann"               - f(0) = f(1); f(nx+1) = f(nx) 
-                "DirichletNeumann"      - f(0) = 0; f(nx+1) = f(nx) 
-                "NeumannDirichlet"      - f(0) = f(1); f(nx+1) = 0 
+                "periodic"              - p(n+nx) = p(n) 
+                "Dirichlet"             - p(0) = p(nx+1,n) = 0 
+                "Neumann"               - p(0) = p(1); p(nx+1) = p(nx) 
+                "DirichletNeumann"      - p(0) = 0; p(nx+1) = p(nx) 
+                "NeumannDirichlet"      - p(0) = p(1); p(nx+1) = 0 
             When xBC is a scalar number, the Bloch periodic boundary condition is
-            used with f(n+nx) = f(n)*exp(1i*xBC); in other words, xBC = kx_B*nx*dx =
+            used with p(n+nx) = p(n)*exp(1i*xBC); in other words, xBC = kx_B*nx*dx =
             kx_B*p where kx_B is the Bloch wave number and p = nx*dx is the
             periodicity in x. 
         n0 (real numeric scalar, optional, defaults to 0):
@@ -148,7 +148,7 @@ end
             This input primarily handle this scenario. 
         
         === Output Arguments ===
-            fun_du_1d (function_handle):
+            fun_df_1d (function_handle):
                 A function that, given one element of (kxdx_all) as the input, 
                 returns its normalized derivative transverse field profile as an nx vector;
                 when the input is a vector, it returns a matrix where each column
@@ -177,7 +177,7 @@ function mesti_build_transverse_function_derivative(nx::Int, xBC::Union{String,R
     end
     
     # Forward difference of dimensionless transverse mode profile
-    fun_du_1d(kxdx) = if xBC == "Bloch"
+    fun_df_1d(kxdx) = if xBC == "Bloch"
                             exp.(((2:(nx+1)).-n0)*(1im*reshape(vcat(kxdx),1,:)))/sqrt(nx)-
                             exp.(((1:nx).-n0)*(1im*reshape(vcat(kxdx),1,:)))/sqrt(nx)
                       elseif xBC == "Dirichlet"
@@ -193,7 +193,7 @@ function mesti_build_transverse_function_derivative(nx::Int, xBC::Union{String,R
                             cos.(((1.5:(nx+1)))*reshape(vcat(kxdx),1,:))*sqrt(2/(nx+0.5))-        
                             cos.(((0.5:nx))*reshape(vcat(kxdx),1,:))*sqrt(2/(nx+0.5)) 
                       end 
-    return fun_du_1d
+    return fun_df_1d
 end
 
 """

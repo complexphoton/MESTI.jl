@@ -323,21 +323,21 @@ end
                     [n1, m1, l1, d, w, h] specifies the location and the size of the
                     cuboid on Ex-grid. Here, (n1, m1, l1) is the index of the (x, y, z) coordinate of
                     the smaller-x, smaller-y, and smaller-z corner of the cuboid, 
-                    at the location of f(n1, m1, l1) where f = Ex; (d, w, h) is the depth, width, and height 
+                    at the location of p(n1, m1, l1) where p = Ex; (d, w, h) is the depth, width, and height 
                     of the cuboid, such that (n2, m2, l2) = (n1+d-1, m1+w-1, l1+h-1) is the index
                     of the higher-index corner of the cuboid.
                     For 2D TM case, users only need to specify [m1, l1, w, h].
                 Bx_struct.data (2D, 3D or 4D numeric array): nonzero elements of matrix B for x component
                     within the cuboid specified by Bx_struct.pos.
                     When it is a 4D array (general 3D system), Bx_struct.data[n',m',l',a] is the a-th input
-                    source at the location of f(n=n1+n'-1, m=m1+m'-1, l=l1+l'-1), which becomes
+                    source at the location of p(n=n1+n'-1, m=m1+m'-1, l=l1+l'-1), which becomes
                     B[n+(m-1)*nx_Ex+(l-1)*nx_Ex*ny_Ex, a]. In other words, Bx_struct.data[:,:,:,a] gives the
-                    sources at the cuboid f(n1+(0:(d-1)), m1+(0:(w-1)), l1+(0:(h-1))). So,
+                    sources at the cuboid p(n1+(0:(d-1)), m1+(0:(w-1)), l1+(0:(h-1))). So,
                     size(Bx_struct.data) must equal (d, w, h, number of inputs).
                         When it is a 3D array (2D TM system), Bx_struct.data(m',l',a) is the a-th input
-                    source at the location of f(m=m1+m'-1, l=l1+l'-1), which becomes
+                    source at the location of p(m=m1+m'-1, l=l1+l'-1), which becomes
                     Bx(m+(l-1)*ny, a). In other words, Bx_struct.data(:,:,a) gives the
-                    sources at the rectangle f(m1+(0:(w-1)), l1+(0:(h-1))). So,
+                    sources at the rectangle p(m1+(0:(w-1)), l1+(0:(h-1))). So,
                     size(Bx_struct.data, [1,2]) must equal [w, h], and
                     size(Bx_struct.data, 3) is the number of inputs.
                     Alternatively, Bx_struct.data can be a 2D array that is
@@ -368,12 +368,12 @@ end
             can use a source structure with the following fields:
                 Bx_struct.ind (integer vector): linear indices of the spatial
                     locations of the nonzero elements of matrix B for x component, such that
-                    f(Bx_struct.ind) are the points where the source is placed. Such linear 
+                    p(Bx_struct.ind) are the points where the source is placed. Such linear 
                     indices can be constructed from Base._sub2ind().
                 Bx_struct.data (2D numeric matrix): nonzero elements of matrix B for x component 
                     at the locations specified by Bx_struct.ind. Specifically,
                     Bx_struct.data[i,a] is the a-th input source at the location of
-                    f(Bx_struct.ind[i]), which becomes B[Bx_struct.ind[i], a]. So,
+                    p(Bx_struct.ind[i]), which becomes B[Bx_struct.ind[i], a]. So,
                     size(Bx_struct.data, 1) must equal length(Bx_struct.ind), and
                     size(Bx_struct.data, 2) is the number of inputs.
                 By_struct.ind (integer vector): linear indices of the spatial
@@ -413,21 +413,21 @@ end
                     [n1, m1, l1, d, w, h] specifies the location and the size of the
                     cuboid on Ex-grid. Here, (n1, m1, l1) is the index of the (x, y, z) coordinate of
                     the smaller-x, smaller-y, and smaller-z corner of the cuboid, 
-                    at the location of f(n1, m1, l1) where f = Ex; (d, w, h) is the depth, width, and height 
+                    at the location of p(n1, m1, l1) where p = Ex; (d, w, h) is the depth, width, and height 
                     of the cuboid, such that (n2, m2, l2) = (n1+d-1, m1+w-1, l1+h-1) is the index
                     of the higher-index corner of the cuboid.
                     For 2D TM case, users only need to specify [m1, l1, w, h].
                 Cx_struct.data (2D, 3D or 4D numeric array): nonzero elements of matrix C for x component
                     within the cuboid specified by Cx_struct.pos.
                     When it is a 4D array (general 3D system), Cx_struct.data[n',m',l',a] is the a-th input
-                    source at the location of f(n=n1+n'-1, m=m1+m'-1, l=l1+l'-1), which becomes
+                    source at the location of p(n=n1+n'-1, m=m1+m'-1, l=l1+l'-1), which becomes
                     C[n+(m-1)*nx_Ex+(l-1)*nx_Ex*ny_Ex, a]. In other words, Cx_struct.data[:,:,:,a] gives the
-                    sources at the cuboid f(n1+(0:(d-1)), m1+(0:(w-1)), l1+(0:(h-1))). So,
+                    sources at the cuboid p(n1+(0:(d-1)), m1+(0:(w-1)), l1+(0:(h-1))). So,
                     size(Cx_struct.data) must equal (d, w, h, number of inputs).
                         When it is a 3D array (2D system), Cx_struct.data(m',l',a) is the a-th input
-                    source at the location of f(m=m1+m'-1, l=l1+l'-1), which becomes
+                    source at the location of p(m=m1+m'-1, l=l1+l'-1), which becomes
                     Cx(m+(l-1)*ny, a). In other words, Cx_struct.data(:,:,a) gives the
-                    sources at the rectangle f(m1+(0:(w-1)), l1+(0:(h-1))). So,
+                    sources at the rectangle p(m1+(0:(w-1)), l1+(0:(h-1))). So,
                     size(Cx_struct.data, [1,2]) must equal [w, h], and
                     size(Cx_struct.data, 3) is the number of inputs.
                     Alternatively, Cx_struct.data can be a 2D array that is
@@ -450,11 +450,11 @@ end
             to a structure array with the following fields:
                 Cx_struct.ind (integer vector): linear indices of the spatial
                     locations of the nonzero elements of matrix C for x component, such that
-                    f(Cx_struct.ind) are the points where the source is placed.
+                    p(Cx_struct.ind) are the points where the source is placed.
                 Cx_struct.data (2D numeric matrix): nonzero elements of matrix C for x component 
                     at the locations specified by Cx_struct.ind. Specifically,
                     Cx_struct.data[i,a] is the a-th input source at the location of
-                    f(Cx_struct.ind[i]), which becomes C[Cx_struct.ind[i], a]. So,
+                    p(Cx_struct.ind[i]), which becomes C[Cx_struct.ind[i], a]. So,
                     size(Cx_struct.data, 1) must equal length(Cx_struct.ind), and
                     size(Cx_struct.data, 2) is the number of inputs.
                 Cy_struct.ind (integer vector): linear indices of the spatial
@@ -1286,7 +1286,7 @@ function mesti(syst::Syst, B::Union{SparseMatrixCSC{Int64,Int64},SparseMatrixCSC
                     end
                     ind_list = zeros(N_tot)
                     a_list = zeros(N_tot)
-                    v_list = zeros(N_tot)
+                    v_list = zeros(ComplexF64, N_tot)
                     N = 0
                     M = 0
                 else
@@ -1505,7 +1505,7 @@ function mesti(syst::Syst, B::Union{SparseMatrixCSC{Int64,Int64},SparseMatrixCSC
                     end
                     ind_list = zeros(N_tot)
                     a_list = zeros(N_tot)
-                    v_list = zeros(N_tot)
+                    v_list = zeros(ComplexF64, N_tot)
                     N = 0
                     M = 0
                 else

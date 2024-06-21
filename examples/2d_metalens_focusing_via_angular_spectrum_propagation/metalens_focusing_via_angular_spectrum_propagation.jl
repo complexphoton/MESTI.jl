@@ -77,14 +77,14 @@ kxdx_FOV = sqrt.((k0dx)^2 .- (kydx_FOV).^2)      # kxdx within the FOV
 N_L = length(kydx_FOV)   # Number of incident angles of interest
 
 # Build the propagating channels on the left of metalens
-B_basis = channels_L.u_x_m(channels_L.kydx_prop)       
+B_basis = channels_L.f_x_m(channels_L.kydx_prop)       
 
 # Multiply the flux-normalized prefactor sqrt(nu)
 sqrt_nu_L_basis = reshape(channels_L.sqrt_nu_prop,1,:)  # row vector
 
 # Build the truncated incident plane waves at various angles
 ind_source_out = findall(x-> (abs(x) > D_in/2), (collect(0.5:1:ny) .- ny/2)*dx)  # y coordinates outside of the input aperture
-B_trunc = channels_L.u_x_m(kydx_FOV)*sqrt(ny/ny_L)
+B_trunc = channels_L.f_x_m(kydx_FOV)*sqrt(ny/ny_L)
 B_trunc[ind_source_out,:] .= 0      # Block light outside of the input aperture
 
 # We project each truncated input plane wave, with |y|<=D_in/2, onto propagating channels at the metalens input side,

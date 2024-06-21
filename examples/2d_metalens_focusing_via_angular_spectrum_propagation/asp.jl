@@ -38,7 +38,7 @@ ASP use angular spectrum propagation (ASP) to propagate a scalar field
        different distance x (if x is a row vector).
 """
 
-function asp(f0::Union{Matrix{Int64}, Matrix{Float64}, Matrix{ComplexF64}, Vector{Int64}, Vector{Float64}, Vector{ComplexF64}}, x::Union{Int64, Float64, Matrix{Int64}, Matrix{Float64}}, kx_prop::Union{Vector{Int64}, Vector{Float64}, Vector{ComplexF64}}, ny_tot::Union{Int64, Nothing}, ny_pad_low::Union{Int64, Nothing})
+function asp(f0::Union{Matrix{Int32}, Matrix{Int64}, Matrix{Float32}, Matrix{Float64}, Matrix{ComplexF32}, Matrix{ComplexF64}, Vector{Int32}, Vector{Int64}, Vector{Float32}, Vector{Float64}, Vector{ComplexF32},  Vector{ComplexF64}}, x::Union{Int64, Float64, Matrix{Int64}, Matrix{Float64}}, kx_prop::Union{Vector{Int64}, Vector{Float64}, Vector{ComplexF64}}, ny_tot::Union{Int64, Nothing}, ny_pad_low::Union{Int64, Nothing})
     
     # Check if f0 has more than one column and enforce x to be a scalar
     if size(f0, 2) > 1 && !(isa(x, Int64) || isa(x, Float64))
@@ -95,10 +95,10 @@ end
 # The following are asp functions to take different number of input arguments, but all of them will
 # call the asp main function.
 
-function asp(f0::Union{Matrix{Int64}, Matrix{Float64}, Matrix{ComplexF64}, Vector{Int64}, Vector{Float64}, Vector{ComplexF64}}, x::Union{Int64, Float64, Matrix{Int64}, Matrix{Float64}}, kx_prop::Union{Vector{Int64}, Vector{Float64}, Vector{ComplexF64}})
+function asp(f0::Union{Matrix{Int32}, Matrix{Int64}, Matrix{Float32}, Matrix{Float64}, Matrix{ComplexF32}, Matrix{ComplexF64}, Vector{Int32}, Vector{Int64}, Vector{Float32}, Vector{Float64}, Vector{ComplexF32},  Vector{ComplexF64}}, x::Union{Int64, Float64, Matrix{Int64}, Matrix{Float64}}, kx_prop::Union{Vector{Int64}, Vector{Float64}, Vector{ComplexF64}})
     return asp(f0, x, kx_prop, nothing, nothing)
 end
 
-function asp(f0::Union{Matrix{Int64}, Matrix{Float64}, Matrix{ComplexF64}, Vector{Int64}, Vector{Float64}, Vector{ComplexF64}}, x::Union{Int64, Float64, Matrix{Int64}, Matrix{Float64}}, kx_prop::Union{Vector{Int64}, Vector{Float64}, Vector{ComplexF64}}, ny_tot::Union{Int64, Nothing})
+function asp(f0::Union{Matrix{Int32}, Matrix{Int64}, Matrix{Float32}, Matrix{Float64}, Matrix{ComplexF32}, Matrix{ComplexF64}, Vector{Int32}, Vector{Int64}, Vector{Float32}, Vector{Float64}, Vector{ComplexF32},  Vector{ComplexF64}}, x::Union{Int64, Float64, Matrix{Int64}, Matrix{Float64}}, kx_prop::Union{Vector{Int64}, Vector{Float64}, Vector{ComplexF64}}, ny_tot::Union{Int64, Nothing})
     return asp(f0, x, kx_prop, ny_tot, nothing)
 end

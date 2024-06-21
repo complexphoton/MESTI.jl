@@ -89,7 +89,7 @@ end
              where PEC stands for perfect electric conductor and PMC stands for perfect
              magnetic conductor.
              When xBC is a numeric scalar, the Bloch periodic boundary condition is
-          used with f(n+nx,m,l) = f(n,m,l)*exp(1i*xBC), f=Ex,Ey,Ez; in other words, 
+          used with p(n+nx,m,l) = p(n,m,l)*exp(1i*xBC), p = Ex,Ey,Ez; in other words, 
           xBC = kx_B*nx*dx = kx_B*Lambda where kx_B is the Bloch wave number and 
           Lambda = nx*dx is the periodicity in x. In this case, nx = nx_Ex = nx_Ey = nx_Ez.
        yBC (character vector or numeric scalar; required):
@@ -318,9 +318,9 @@ function mesti_build_fdfd_matrix(epsilon_xx::Union{Array{Int64,3},Array{Float64,
     # Build the first derivative and use Kronecker outer product to go from 1D to 2D or from 1D to 3D
     if use_2D_TM
         # Build the first derivative and average matrices on E, such that
-        #   ddx_E*f = df/dx
-        #   avg_x_E*f = average of f among two neighboring pixels
-        # where f = Ex is a 1d vector.
+        #   ddx_E*p = dp/dx
+        #   avg_x_E*p = average of p among two neighboring pixels
+        # where p = Ex is a 1d vector.
         # Note that sx_E and sx_H are column vectors.
         # Later we will use Kronecker outer product to go from 1D to 2D.
         (ddy_E, avg_y_E, sy_E, sy_H, ind_yPML_E) = build_ddx_E(ny_Ex, yBC, yPML, "y") # ddy_E operates on Ex or Ez
@@ -357,7 +357,7 @@ function mesti_build_fdfd_matrix(epsilon_xx::Union{Array{Int64,3},Array{Float64,
             A = - kron(ddz_H*ddz_E, spdiagm(ny_Ex, ny_Ex, sy_E)) - kron(spdiagm(nz_Ex, nz_Ex, sz_E), ddy_H*ddy_E) - spdiagm(nt_Ex, nt_Ex, (k0dx^2)*(syz_E[:].*epsilon_xx[:]))
         end
     else               
-        # Build the first derivatives in 1D, such that ddx*f = df/dx, ddy*f = df/dy, ddz*f = df/dz
+        # Build the first derivatives in 1D, such that ddx*p = dp/dx, ddy*p = dp/dy, ddz*p = dp/dz
         # Later we will use Kronecker outer product to go from 1D to 3D. 
         # The operator notations follow
         #   ddx_HzEy: x-derivative operates on Ey producing Hz
@@ -715,44 +715,44 @@ function build_ddx_E(n_E::Int, BC::Union{String,Real,Complex}, pml::Vector{PML},
     end
 
     # Build the first-derivative matrix and the average matrix on E
-    # f = [f(1), ..., f(n_E)].' with f = Ey or Ez, on integer sites
-    # df = (df/dx)*dx, proportional to Hy or Hz, on half-integer sites
-    # avg_f = average of f between two neighboring sites, on half-integer sites
+    # p = [p(1), ..., p(n_E)].' with p = Ey or Ez, on integer sites
+    # dp = (dp/dx)*dx, proportional to Hy or Hz, on half-integer sites
+    # avg_p = average of p between two neighboring sites, on half-integer sites
     if BC == "Bloch"
-        # f(n_E+1) = f(1)*exp(1i*kLambda); f(0) = f(n_E)*exp(-1i*kLambda)
-        # ddx*f = [df(1.5), ..., df(n_E+0.5)].'
+        # p(n_E+1) = p(1)*exp(1i*kLambda); p(0) = p(n_E)*exp(-1i*kLambda)
+        # ddx*p = [dp(1.5), ..., dp(n_E+0.5)].'
         ddx = spdiagm(n_E, n_E, +1 => ones(n_E-1), 0 => -ones(n_E), 1-n_E => exp(1im*kLambda)*ones(1))
-        # avg*f = [avg_f(1.5), ..., avg_f(n_E+0.5)].'
+        # avg*p = [avg_p(1.5), ..., avg_p(n_E+0.5)].'
         avg = spdiagm(n_E, n_E, +1 => ones(n_E-1)/2, 0 => ones(n_E)/2, 1-n_E => exp(1im*kLambda)*ones(1)/2)
     elseif BC == "PEC" # PEC on both sides
-        # f(0) = f(n_E+1) = 0
-        # ddx*f = df = [df(0.5), ..., df(n+0.5)].'
+        # p(0) = p(n_E+1) = 0
+        # ddx*p = dp = [dp(0.5), ..., dp(n+0.5)].'
         ddx = spdiagm(n_E+1, n_E, 0 => ones(n_E), -1 => -ones(n_E))
-        # avg*f = [avg_f(0.5), ..., avg_f(n_E+0.5)].'
+        # avg*p = [avg_p(0.5), ..., avg_p(n_E+0.5)].'
         avg = spdiagm(n_E+1, n_E, 0 => ones(n_E)/2, -1 => ones(n_E)/2)        
     elseif BC == "PMC" # PMC on both sides
-        # f(0) = f(1); f(n_E+1) = f(n_E)
-        # ddx*f = [df(1.5), ..., df(n_E-0.5)].'; exclude df(0.5) and df(n_E+0.5) because they are zero
+        # p(0) = p(1); p(n_E+1) = p(n_E)
+        # ddx*p = [dp(1.5), ..., dp(n_E-0.5)].'; exclude dp(0.5) and dp(n_E+0.5) because they are zero
         ddx = spdiagm(n_E-1, n_E, +1 => ones(n_E-1), 0 => -ones(n_E-1))
-        # avg*f = [avg_f(1.5), ..., avg_f(n_E-0.5)].'; exclude avg_f(0.5) and avg_f(n_E+0.5)
+        # avg*p = [avg_p(1.5), ..., avg_p(n_E-0.5)].'; exclude avg_p(0.5) and avg_p(n_E+0.5)
         avg = spdiagm(n_E-1, n_E, +1 => ones(n_E-1)/2, 0 => ones(n_E-1)/2)
     elseif BC == "PECPMC" # PEC on the low side, PMC on the high side
-        # f(0) = 0; f(n_E+1) = f(n_E)
-        # ddx*f = [df(0.5), ..., df(n_E-0.5)].'; exclude df(n_E+0.5) because it is zero
+        # p(0) = 0; p(n_E+1) = p(n_E)
+        # ddx*p = [dp(0.5), ..., dp(n_E-0.5)].'; exclude dp(n_E+0.5) because it is zero
         ddx = spdiagm(n_E, n_E, 0 => ones(n_E), -1 => -ones(n_E-1))
-        # avg*f = [avg_f(0.5), ..., avg_f(n_E-0.5)].'; we exclude avg_f(n_E+0.5)
+        # avg*p = [avg_p(0.5), ..., avg_p(n_E-0.5)].'; we exclude avg_p(n_E+0.5)
         avg = spdiagm(n_E, n_E, 0 => ones(n_E)/2, -1 => ones(n_E-1)/2)
     elseif BC == "PMCPEC" # PMC on the low side, PEC on the high side
-        # f(0) = f(1); f(n_E+1) = 0
-        # ddx*f = [df(1.5), ..., df(n_E+0.5)].'; exclude df(0.5) because it is zero
+        # p(0) = p(1); p(n_E+1) = 0
+        # ddx*p = [dp(1.5), ..., dp(n_E+0.5)].'; exclude dp(0.5) because it is zero
         ddx = spdiagm(n_E, n_E, +1 => ones(n_E-1), 0 => -ones(n_E))
-        # avg*f = [avg_f(1.5), ..., avg_f(n_E+0.5)].'; exclude avg_f(0.5)
+        # avg*p = [avg_p(1.5), ..., avg_p(n_E+0.5)].'; exclude avg_p(0.5)
         avg = spdiagm(n_E, n_E, +1 => ones(n_E-1)/2, 0 => ones(n_E)/2)
     else
         throw(ArgumentError("Input argument $(direction)BC = \"$(BC)\" is not a supported option."))              
     end
 
-    n_H = size(ddx,1) # number of sites for df/dx (ie, Hy or Hz)
+    n_H = size(ddx,1) # number of sites for dp/dx (ie, Hy or Hz)
 
     # Coordinate-stretching factor: s(x) = kappa(x) + sigma(x)/(alpha(u) - i*omega)
     s_E = ones(ComplexF64, n_E) # s-factor for Ey or Ez (on integer sites)
@@ -779,19 +779,19 @@ function build_ddx_E(n_E::Int, BC::Union{String,Real,Complex}, pml::Vector{PML},
     # Note that where the "end of PML" is depends on the boundary condition.
     # Let index i=0 be one site before PML, so p(i=0)=0.
     # Then, i=1 is the first site of PML and i=npixels is the last site of PML we explicitly simulate. But we do not set p(i=npixels)=1.
-    # For Dirichlet BC, the BC is such that f=0 at i=npixels+1, so we let the end of PML be i=npixels+1, with an effective PML thickness of npixels+1 pixels.
-    # For Neumann BC, the BC is such that df=0 at i=npixels+0.5, so we let the end of PML be i=npixels+0.5, with an effective PML thickness of npixels+0.5 pixels.
-    # For periodic and Bloch periodic BC, we let p(x) be symmetric on the two sides of f with p(0.5)=p(n+0.5)=1; note that f(0.5) and f(n+0.5) are the same site (with a possible Bloch phase difference). If the PML parameters on the two sides are the same, the s-factor will be continuous across the periodic boundary.
+    # For Dirichlet BC, the BC is such that p=0 at i=npixels+1, so we let the end of PML be i=npixels+1, with an effective PML thickness of npixels+1 pixels.
+    # For Neumann BC, the BC is such that dp=0 at i=npixels+0.5, so we let the end of PML be i=npixels+0.5, with an effective PML thickness of npixels+0.5 pixels.
+    # For periodic and Bloch periodic BC, we let p(x) be symmetric on the two sides of p with p(0.5)=p(n+0.5)=1; note that p(0.5) and p(n+0.5) are the same site (with a possible Bloch phase difference). If the PML parameters on the two sides are the same, the s-factor will be continuous across the periodic boundary.
 
-    # Construct p(x) and their corresponding indices for df/dx
+    # Construct p(x) and their corresponding indices for dp/dx
     # Also works for 2D TM fields; will add 2D TE case later
     if BC == "Bloch"
         if npixels[1]*npixels[2] == 0 && (npixels[1] != 0 || npixels[2] != 0)
             @warn "Bloch periodic boundary condition is used with a single-sided PML in $(direction) direction; transmission through PML will only undergo single-pass attenuation."
         end
         npixels_effective = [npixels[1]+0.5, npixels[2]+0.5]        
-        # f = Ez; ddx*f = [df(1.5), ..., df(n_E+0.5)].'
-        # no s-factor for df(0.5) since we only consider df(n_E+0.5)
+        # p = Ez; ddx*p = [dp(1.5), ..., dp(n_E+0.5)].'
+        # no s-factor for dp(0.5) since we only consider dp(n_E+0.5)
         p_PML_2 = [((1:npixels[1]).-0.5)/npixels_effective[1], ((1:(npixels[2]+1)).-0.5)/npixels_effective[2]]
         ind_PML_2 = [reverse(1:npixels[1]), (n+1).-reverse(1:(npixels[2]+1))]                
     elseif BC == "PEC" # PEC on both sides    
@@ -869,28 +869,28 @@ function build_ave_x_Ex(n_E::Int, BC::Union{String,Real,Complex}, direction::Str
     end
 
     # Build the first-derivative matrix and the average matrix on E
-    # f = [f(1), ..., f(n_E)].' with f = Ey or Ez, on integer sites
-    # df = (df/dx)*dx, proportional to Hy or Hz, on half-integer sites
-    # avg_f = average of f between two neighboring sites, on half-integer sites
+    # p = [p(1), ..., p(n_E)].' with p = Ey or Ez, on integer sites
+    # dp = (dp/dx)*dx, proportional to Hy or Hz, on half-integer sites
+    # avg_p = average of f between two neighboring sites, on half-integer sites
     if BC == "Bloch"
-        # f(n_E+1) = f(1)*exp(1i*kLambda); f(0) = f(n_E)*exp(-1i*kLambda)
-        # avg*f = [avg_f(1.5), ..., avg_f(n_E+0.5)].'
+        # p(n_E+1) = p(1)*exp(1i*kLambda); p(0) = p(n_E)*exp(-1i*kLambda)
+        # avg*p = [avg_p(1.5), ..., avg_p(n_E+0.5)].'
         avg = spdiagm(n_E, n_E, +1 => ones(n_E-1)/2, 0 => ones(n_E)/2, 1-n_E => exp(1im*kLambda)*ones(1)/2)
     elseif BC == "PEC" # PEC on both sides
-        # f(0) = f(1); f(n_E+1) = f(n_E)
-        # avg*f = [avg_f(1.5), ..., avg_f(n_E-0.5)].'; exclude avg_f(0.5) and avg_f(n_E+0.5)
+        # p(0) = p(1); p(n_E+1) = p(n_E)
+        # avg*p = [avg_p(1.5), ..., avg_p(n_E-0.5)].'; exclude avg_p(0.5) and avg_p(n_E+0.5)
         avg = spdiagm(n_E-1, n_E, +1 => ones(n_E-1)/2, 0 => ones(n_E-1)/2)
     elseif BC == "PMC" # PMC on both sides
-        # f(0) = f(n_E+1) = 0
-        # avg*f = [avg_f(0.5), ..., avg_f(n_E+0.5)].'
+        # p(0) = p(n_E+1) = 0
+        # avg*p = [avg_p(0.5), ..., avg_p(n_E+0.5)].'
         avg = spdiagm(n_E+1, n_E, 0 => ones(n_E)/2, -1 => ones(n_E)/2)        
     elseif BC == "PECPMC" # PEC on the low side, PMC on the high side
-        # f(0) = f(1); f(n_E+1) = 0
-        # avg*f = [avg_f(1.5), ..., avg_f(n_E+0.5)].'; exclude avg_f(0.5)
+        # p(0) = p(1); p(n_E+1) = 0
+        # avg*p = [avg_p(1.5), ..., avg_p(n_E+0.5)].'; exclude avg_p(0.5)
         avg = spdiagm(n_E, n_E, +1 => ones(n_E-1)/2, 0 => ones(n_E)/2)
     elseif BC == "PMCPEC" # PMC on the low side, PEC on the high side
-        # f(0) = 0; f(n_E+1) = f(n_E)
-        # avg*f = [avg_f(0.5), ..., avg_f(n_E-0.5)].'; we exclude avg_f(n_E+0.5)
+        # p(0) = 0; p(n_E+1) = p(n_E)
+        # avg*p = [avg_p(0.5), ..., avg_p(n_E-0.5)].'; we exclude avg_p(n_E+0.5)
         avg = spdiagm(n_E, n_E, 0 => ones(n_E)/2, -1 => ones(n_E-1)/2)
     else
         throw(ArgumentError("Input argument $(direction)BC = \"$(BC)\" is not a supported option."))              

@@ -2,6 +2,7 @@ using Pkg
 
 Pkg.add(Pkg.PackageSpec(name="Makie", version="0.19.12")) # Registered GeometryPrimitives (v0.4.6) is only compatible with the old version Makie (v0.19.12)
 Pkg.add("GeometryPrimitives") # (v0.4.6)
+Pkg.add("Interpolations")
 Pkg.add("LinearAlgebra")
 Pkg.add("Plots")
 Pkg.add("Printf")

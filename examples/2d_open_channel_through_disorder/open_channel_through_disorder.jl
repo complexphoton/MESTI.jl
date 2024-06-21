@@ -108,6 +108,7 @@ nz_low  = round(Int,(L_tot-L)/2/dx)
 nz_high = nz_low
 opts.nz_low = nz_low
 opts.nz_high = nz_high
+opts.use_L0_threads = false
 
 # compute the field-profiles through mesti()
 Ex, _, _ = mesti2s(syst, input, opts)
@@ -137,14 +138,14 @@ syst.PML = [pml]
 # syst.zPML = [pml] (and do not need to specify pml.direction = "z")
 
 Bx = Source_struct()
-u_prop_low_Ex = channels.u_x_m(channels.low.kydx_prop) # the transverse profiles, u_Ex, for the propagating ones
+f_prop_low_Ex = channels.f_x_m(channels.low.kydx_prop) # the transverse profiles, f_Ex, for the propagating ones
 
-# If it is a single propagating channel, a line source of -2i*sqrt(nu)*u_Ex(m) at l=0 will generate an z-flux-normalized incident field of exp(i*kzdx*|l|)*u_Ex(l)/sqrt(nu), where nu = sin(kzdx)
+# If it is a single propagating channel, a line source of -2i*sqrt(nu)*f_Ex(m) at l=0 will generate an z-flux-normalized incident field of exp(i*kzdx*|l|)*f_Ex(l)/sqrt(nu), where nu = sin(kzdx)
 # here, we want input wavefront fields on the low side, which is a superposition of propagating channels
 # these input wavefront fields on the low side are specified by v_low, and we take superpositions of the propagating channels using the v coefficients, with the sqrt(nu)*exp(-i*kzdx*0.5) prefactors included.
 # we will multiply the -2i prefactor at the end.
 # the source B_Ex would generate the input wavefront fields
-B_Ex_low = u_prop_low_Ex*(channels.low.sqrt_nu_prop.*exp.((-1im*0.5)*channels.low.kzdx_prop).*v_low) # 0.5 pixel backpropagation indicates that the source is half a pixel away from z = 0
+B_Ex_low = f_prop_low_Ex*(channels.low.sqrt_nu_prop.*exp.((-1im*0.5)*channels.low.kzdx_prop).*v_low) # 0.5 pixel backpropagation indicates that the source is half a pixel away from z = 0
 Bx.data = [B_Ex_low] # the value of the source
 
 # the position of the source specify by a rectangle.
@@ -158,6 +159,7 @@ Bx.pos = [[1,pml_npixels+1,ny_Ex,1]]
 opts = Opts()
 # the -2i prefactor would be multiplied by.
 opts.prefactor = -2im
+opts.use_L0_threads = false
 
 Ex_prime, _ = mesti(syst, [Bx], opts)
 
@@ -172,7 +174,7 @@ Ex = Ex/maximum(abs.(Ex[:,:,1]))
 nframes_per_period = 10
 
 # extend the x coordinate to include free spaces on the two sides
-z_Ex = vcat(z_Ex[1] .- (opts.nz_low:-1:1)*dx, z_Ex, z_Ex[end] .+ (1:opts.nz_high)*dx)
+z_Ex = vcat(z_Ex[1] .- (nz_low:-1:1)*dx, z_Ex, z_Ex[end] .+ (1:nz_high)*dx)
 
 # animate the field profile with plane-wave input
 anim_pw = @animate for ii ∈ 0:(nframes_per_period-1)
