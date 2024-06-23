@@ -108,6 +108,15 @@ nz_low  = round(Int,(L_tot-L)/2/dx)
 nz_high = nz_low
 opts.nz_low = nz_low
 opts.nz_high = nz_high
+# opts.use_L0_threads = true would enhances the time performance, 
+# but marginally increases the memoery usage. 
+# the default of opts.use_L0_threads is true for 2D system.
+# here we turn opts.use_L0_threads off, because this L0-threads layer
+# in multithreads makes the numerical results slightly depends on the
+# number of threads with acceptable error. 
+# later we want to show that the result from mesti() and mesti2s()
+# should be exact the same later, so we turn it off to exclude the influence from
+# the this L0-threads layer.
 opts.use_L0_threads = false
 
 # compute the field-profiles through mesti()
